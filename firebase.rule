@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Workers collection
+    match /workers/{workerId} {
+      allow read: if isAdmin() || isCurrentUser(workerId);
+      allow write: if isAdmin();
+    }
+
+    // Customers collection
+    match /customers/{customerId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Raw Materials
+    match /rawMaterials/{rmId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Finished Goods
+    match /finishedGoods/{fgId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Production Orders
+    match /productionOrders/{orderId} {
+      allow read: if isAdmin() || isAssignedWorker();
+      allow update: if isAdmin() || (isAssignedWorker() && isUpdatingStatusToCompleted());
+      allow create, delete: if isAdmin();
+    }
+
+    // Sales Orders
+    match /salesOrders/{orderId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Helper functions
+    function isAdmin() {
+      return get(/databases/$(database)/documents/workers/$(request.auth.uid)).data.role == 'Admin';
+    }
+
+    function isCurrentUser(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isAssignedWorker() {
+      let order = resource.data;
+      // For create, resource may not exist yet
+      let assignedWorkerId = resource.data.assignedWorkerId != null ? resource.data.assignedWorkerId : request.resource.data.assignedWorkerId;
+      return request.auth != null && request.auth.uid == assignedWorkerId;
+    }
+
+    function isUpdatingStatusToCompleted() {
+      // Contract workers can only update 'status' field to 'Completed'
+      return request.resource.data.keys().hasOnly(['status']) &&
+             request.resource.data.status == 'Completed';
+    }
+  }
+}
