@@ -3,6 +3,7 @@ import { useSalesOrders } from "../../hooks/useSalesOrders";
 import { useCustomers } from "../../hooks/useCustomers";
 import { useReadyBelts } from "../../hooks/useReadyBelts";
 import CancelButton from "../ui/CancelButton.tsx";
+import PrimaryButton from "../ui/PrimaryButton.tsx";
 
 type OrderItem = {
   beltType: string;
@@ -117,7 +118,7 @@ export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) 
       
       <div className="flex justify-end gap-3 pt-2">
         <CancelButton onClick={onClose} />
-        <button type="submit" className="bg-primary-600 text-grey px-4 py-2 rounded">Save Order</button>
+        <PrimaryButton type="submit" variant="primary">Save</PrimaryButton>
       </div>
     </form>
   );
