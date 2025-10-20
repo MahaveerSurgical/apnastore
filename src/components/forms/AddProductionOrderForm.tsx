@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { db } from "../../firebase/firebaseConfig.ts";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
+import { useProductionOrders } from "../../hooks/useProductionOrders";
+import { useWorkers } from "../../hooks/useWorkers";
+import { useReadyBelts } from "../../hooks/useReadyBelts";
 import CancelButton from "../ui/CancelButton.tsx";
+import PrimaryButton from "../ui/PrimaryButton.tsx";
 
 export default function AddProductionOrderForm({ onClose }: { onClose: () => void }) {
-  const { data: finishedGoods, loading: loadingFg } = useFirestoreCollection("finishedGoods");
-  const { data: workers, loading: loadingWorkers } = useFirestoreCollection("workers");
+  const { addProductionOrder } = useProductionOrders();
+  const { readyBelts, loading: loadingFg } = useReadyBelts();
+  const { workers, loading: loadingWorkers } = useWorkers();
 
   const [form, setForm] = useState({
     finishedGoodId: "",
@@ -33,13 +35,30 @@ export default function AddProductionOrderForm({ onClose }: { onClose: () => voi
       return;
     }
 
-    await addDoc(collection(db, "productionOrders"), {
-      ...form,
-      quantity: Number(form.quantity) || 0,
-      status: "Pending",
-      createdAt: serverTimestamp(),
-    });
-    onClose();
+    const selectedWorker = workers.find(w => w.id === form.assignedWorkerId);
+    const selectedBelt = readyBelts.find(b => b.id === form.finishedGoodId);
+
+    if (!selectedWorker || !selectedBelt) {
+      alert("Invalid worker or belt selection");
+      return;
+    }
+
+    try {
+      await addProductionOrder({
+        orderNumber: `PO-${Date.now()}`,
+        workerId: form.assignedWorkerId,
+        workerName: selectedWorker.name,
+        beltType: selectedBelt.type,
+        quantity: Number(form.quantity) || 0,
+        status: 'pending',
+        startDate: new Date(),
+        notes: ''
+      });
+      onClose();
+    } catch (error) {
+      console.error('Failed to create production order:', error);
+      alert('Failed to create production order');
+    }
   };
 
   if (loadingFg || loadingWorkers) {
@@ -50,8 +69,12 @@ export default function AddProductionOrderForm({ onClose }: { onClose: () => voi
     <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-lg mx-auto">
       <h2 className="text-xl font-semibold">Create Production Order</h2>
       <select name="finishedGoodId" value={form.finishedGoodId} onChange={handleChange} className="border rounded w-full px-3 py-2" required>
-        <option value="" disabled>Select Finished Good</option>
-        {finishedGoods.map(fg => <option key={fg.id} value={fg.id}>{fg.name}</option>)}
+        <option value="" disabled>Select Belt Type</option>
+        {readyBelts.map(belt => (
+          <option key={belt.id} value={belt.id}>
+            {belt.type} - {belt.size}
+          </option>
+        ))}
       </select>
       <select name="assignedWorkerId" value={form.assignedWorkerId} onChange={handleChange} className="border rounded w-full px-3 py-2" required>
         <option value="" disabled>Select Contract Worker</option>
@@ -61,7 +84,7 @@ export default function AddProductionOrderForm({ onClose }: { onClose: () => voi
       
       <div className="flex justify-end gap-3 pt-2">
         <CancelButton onClick={onClose} />
-        <button type="submit" className="bg-primary-600 text-grey px-4 py-2 rounded">Create Order</button>
+        <PrimaryButton type="submit" variant="primary">Save</PrimaryButton>
       </div>
     </form>
   );

@@ -1,6 +1,7 @@
 // import { useState } from 'react';
 import { useFirestoreCollection } from '../../../hooks/useFirestoreCollection';
 import { Card } from '../../../components/ui/Card';
+import { Loading } from '../../../components/ui/Loading';
 // import { Modal } from '../../../components/ui/Modal';
 // import { db } from '../../../firebase/firebaseConfig';
 // import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -27,7 +28,7 @@ export default function RawMaterials() {
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">Raw Materials</h2>
-      {loading && <div className="text-gray-500">Loading...</div>}
+      {loading && <Loading />}
       {error && <div className="text-red-600">{error}</div>}
       {!loading && !error && rawMaterials.length === 0 && (
         <div className="text-gray-500">No raw materials yet. Use the + button to add one.</div>

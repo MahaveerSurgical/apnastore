@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { useFirestoreCollection } from '../../hooks/useFirestoreCollection';
+import { useCustomers } from '../../hooks/useCustomers';
 import { Card } from '../../components/ui/Card';
+import { Loading } from '../../components/ui/Loading';
 // import { Modal } from '../../components/ui/Modal';
 // import { db } from '../../firebase/firebaseConfig';
 // import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 export default function Customers() {
-  const { data: customers, loading, error } = useFirestoreCollection('customers');
+  const { customers, loading, error } = useCustomers();
   const [query, setQuery] = useState('');
   // const [isOpen, setIsOpen] = useState(false);
   // const [name, setName] = useState('');
@@ -42,7 +43,7 @@ export default function Customers() {
           className="w-full max-w-md border p-2 rounded"
         />
       </div>
-      {loading && <div className="text-gray-500">Loading...</div>}
+      {loading && <Loading />}
       {error && <div className="text-red-600">{error}</div>}
       {!loading && !error && customers.length === 0 && (
         <div className="text-gray-500">No customers yet. Use the + button to add one.</div>

@@ -1,31 +1,32 @@
 import React, { useState, useMemo } from "react";
-import { db } from "../../firebase/firebaseConfig.ts";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
+import { useSalesOrders } from "../../hooks/useSalesOrders";
+import { useCustomers } from "../../hooks/useCustomers";
+import { useReadyBelts } from "../../hooks/useReadyBelts";
 import CancelButton from "../ui/CancelButton.tsx";
+import PrimaryButton from "../ui/PrimaryButton.tsx";
 
-// 1. Update the type to allow an empty string for quantity
 type OrderItem = {
-  finishedGoodId: string;
-  quantity: number | ''; // Can be a number or an empty string
+  beltType: string;
+  quantity: number | '';
+  price: number;
 };
 
 export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) {
-  const { data: customers, loading: loadingCust } = useFirestoreCollection("customers");
-  const { data: finishedGoods, loading: loadingFg } = useFirestoreCollection("finishedGoods");
+  const { addSalesOrder } = useSalesOrders();
+  const { customers, loading: loadingCust } = useCustomers();
+  const { readyBelts, loading: loadingFg } = useReadyBelts();
   
   const [customerId, setCustomerId] = useState("");
-  const [items, setItems] = useState<OrderItem[]>([{ finishedGoodId: "", quantity: 1 }]);
+  const [items, setItems] = useState<OrderItem[]>([{ beltType: "", quantity: 1, price: 0 }]);
 
   const totalAmount = useMemo(() => {
     return items.reduce((total, item) => {
-      const product = finishedGoods.find((fg: any) => fg.id === item.finishedGoodId);
-      const price = product?.pricePerUnit || 0;
-      // 2. Safely convert quantity to a number for calculation
+      const belt = readyBelts.find(b => b.id === item.beltType);
+      const price = belt?.price || 0;
       const quantity = Number(item.quantity) || 0;
       return total + (price * quantity);
     }, 0);
-  }, [items, finishedGoods]);
+  }, [items, readyBelts]);
 
   // 3. Simplify the handler to accept the raw string from the input
   const handleItemChange = (index: number, field: keyof OrderItem, value: string) => {
@@ -39,29 +40,42 @@ export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) 
     setItems(newItems);
   };
 
-  const addItem = () => setItems([...items, { finishedGoodId: "", quantity: 1 }]);
+  const addItem = () => setItems([...items, { beltType: "", quantity: 1, price: 0 }]);
   const removeItem = (index: number) => setItems(items.filter((_, i) => i !== index));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerId || items.some(i => !i.finishedGoodId || i.quantity === '')) {
-        alert("Please select a customer and ensure all items have a product and quantity.");
+    if (!customerId || items.some(i => !i.beltType || i.quantity === '')) {
+        alert("Please select a customer and ensure all items have a belt type and quantity.");
         return;
     }
 
-    await addDoc(collection(db, "salesOrders"), {
-      customerId,
-      // 4. Ensure quantity is a number before saving to the database
-      items: items.map(item => ({
-        ...item,
-        quantity: Number(item.quantity) || 0,
-      })),
-      totalAmount,
-      status: "Open",
-      history: [],
-      createdAt: serverTimestamp(),
-    });
-    onClose();
+    const selectedCustomer = customers.find(c => c.id === customerId);
+    if (!selectedCustomer) {
+        alert("Invalid customer selection");
+        return;
+    }
+
+    try {
+      await addSalesOrder({
+        orderNumber: `SO-${Date.now()}`,
+        customerId,
+        customerName: selectedCustomer.name,
+        items: items.map(item => ({
+          ...item,
+          quantity: Number(item.quantity) || 0,
+        })),
+        status: 'pending',
+        totalAmount,
+        paidAmount: 0,
+        dueAmount: totalAmount,
+        deliveryDate: new Date()
+      });
+      onClose();
+    } catch (error) {
+      console.error('Failed to create sales order:', error);
+      alert('Failed to create sales order');
+    }
   };
 
   if (loadingCust || loadingFg) {
@@ -80,11 +94,14 @@ export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) 
       <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
         {items.map((item, idx) => (
           <div key={idx} className="flex items-center space-x-2 p-2 border rounded">
-            <select value={item.finishedGoodId} onChange={e => handleItemChange(idx, "finishedGoodId", e.target.value)} className="border rounded w-full px-3 py-2" required>
-              <option value="" disabled>Select Product</option>
-              {finishedGoods.map((fg: any) => <option key={fg.id} value={fg.id}>{fg.name} (₹{fg.pricePerUnit})</option>)}
+            <select value={item.beltType} onChange={e => handleItemChange(idx, "beltType", e.target.value)} className="border rounded w-full px-3 py-2" required>
+              <option value="" disabled>Select Belt Type</option>
+              {readyBelts.map(belt => (
+                <option key={belt.id} value={belt.id}>
+                  {belt.type} - {belt.size} (₹{belt.price})
+                </option>
+              ))}
             </select>
-            {/* The value can now correctly be an empty string, allowing the user to type freely */}
             <input type="number" value={item.quantity} onChange={e => handleItemChange(idx, "quantity", e.target.value)} className="border rounded px-3 py-2 w-24" min="1" required />
             {items.length > 1 && (
               <button type="button" onClick={() => removeItem(idx)} className="bg-red-500 text-white rounded px-2 py-1 text-xs">Remove</button>
@@ -101,7 +118,7 @@ export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) 
       
       <div className="flex justify-end gap-3 pt-2">
         <CancelButton onClick={onClose} />
-        <button type="submit" className="bg-primary-600 text-grey px-4 py-2 rounded">Save Order</button>
+        <PrimaryButton type="submit" variant="primary">Save</PrimaryButton>
       </div>
     </form>
   );

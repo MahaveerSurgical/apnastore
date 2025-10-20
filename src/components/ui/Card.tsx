@@ -13,13 +13,16 @@ export const Card: React.FC<CardProps> = ({ title, className, children, onClick 
   return (
     <div
       className={clsx(
-        'bg-white shadow-sm border border-gray-200 rounded-xl p-4',
+        'bg-white shadow-sm border border-gray-200 rounded-xl p-4 overflow-hidden break-words',
         className
       )}
       onClick={onClick}
     >
-      {title && <h3 className="text-lg font-semibold text-primary-800 mb-2">{title}</h3>}
-      <div>{children}</div>
+      {title && 
+      <h3 className="text-lg font-semibold text-primary-800 mb-2 break-all">
+      {title}
+      </h3>}
+      <div className="text-sm break-words">{children}</div>
     </div>
   );
 };

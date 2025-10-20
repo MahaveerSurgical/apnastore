@@ -1,5 +1,6 @@
 import { logout } from '../../hooks/useAuth';
 import { useAuthContext } from '../../contexts/AuthContext';
+import  PrimaryButton from '../ui/PrimaryButton';
 
 export const Topbar = () => {
   const { worker } = useAuthContext();
@@ -11,12 +12,11 @@ export const Topbar = () => {
   return (
     <header className="flex justify-between items-center bg-white shadow-sm px-6 py-4">
       <h1 className="text-lg font-semibold">Welcome, {worker?.name}</h1>
-      <button
-        onClick={handleLogout}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-      >
+        <PrimaryButton
+        onClick={handleLogout}variant="danger"
+        >
         Logout
-      </button>
+        </PrimaryButton>
     </header>
   );
 };
