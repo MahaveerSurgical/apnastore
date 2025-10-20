@@ -9,7 +9,8 @@ export default function FloatingActionButton({ onClick }: Props) {
     <button
       onClick={onClick}
       className="fixed 
-      bottom-20 md:bottom-6 right-6 
+      bottom-[calc(env(safe-area-inset-bottom)+5rem)]
+      md:bottom-6 right-6 
       bg-primary-600 hover:bg-primary-700 
       text-grey 
       rounded-full 
