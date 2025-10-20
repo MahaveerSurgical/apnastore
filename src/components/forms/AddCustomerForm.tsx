@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { db } from "../../firebase/firebaseConfig.ts";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useCustomers } from "../../hooks/useCustomers";
 import CancelButton from "../ui/CancelButton.tsx";
 import PrimaryButton from "../ui/PrimaryButton.tsx";
 export default function AddCustomerForm({ onClose }: { onClose: () => void }) {
+  const { addCustomer } = useCustomers();
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -19,10 +19,9 @@ export default function AddCustomerForm({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     if (!form.name || !form.phone) return; // Basic validation
 
-    await addDoc(collection(db, "customers"), {
+    await addCustomer({
       ...form,
       pendingAmount: 0,
-      createdAt: serverTimestamp(),
     });
     onClose();
   };

@@ -1,21 +1,21 @@
 import React, { useState } from "react";
-import { db } from "../../firebase/firebaseConfig.ts";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
+import { useReadyBelts } from "../../hooks/useReadyBelts";
 import CancelButton from "../ui/CancelButton";
 import PrimaryButton from "../ui/PrimaryButton.tsx";
 
-export default function AddFinishedGoodForm({ onClose }: { onClose: () => void }) {
+export default function AddReadyBeltForm({ onClose }: { onClose: () => void }) {
+  const { addReadyBelt } = useReadyBelts();
+
   const [form, setForm] = useState({
-    name: "",
-    pricePerUnit: 0 as number | '',
-    currentStock: 0 as number | '',
+    type: "",
+    size: "",
+    quantity: 0 as number | '',
+    minQuantity: 10 as number | '',
+    price: 0 as number | '',
+    notes: ""
   });
 
-  const [bom, setBom] = useState<{ [key: string]: number | '' }>({});
-  const { data: rawMaterials, loading, error } = useFirestoreCollection("rawMaterials");
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     if (type === 'number') {
       setForm({ ...form, [name]: value === '' ? '' : parseInt(value, 10) });
@@ -24,61 +24,100 @@ export default function AddFinishedGoodForm({ onClose }: { onClose: () => void }
     }
   };
 
-  const handleBomChange = (materialId: string, quantity: string) => {
-    setBom(prevBom => ({
-      ...prevBom,
-      [materialId]: quantity === '' ? '' : parseInt(quantity, 10),
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name) return;
+    if (!form.type || !form.size) {
+      alert('Please fill all required fields');
+      return;
+    }
 
-    // Convert all BOM quantities back to numbers
-    const numericBom = Object.entries(bom).reduce((acc, [key, value]) => {
-      acc[key] = Number(value) || 0;
-      return acc;
-    }, {} as { [key: string]: number });
-
-    await addDoc(collection(db, "finishedGoods"), {
-      name: form.name,
-      pricePerUnit: Number(form.pricePerUnit) || 0,
-      currentStock: Number(form.currentStock) || 0,
-      bom: numericBom,
-      createdAt: serverTimestamp(),
-    });
-    onClose();
+    try {
+      await addReadyBelt({
+        ...form,
+        quantity: Number(form.quantity) || 0,
+        minQuantity: Number(form.minQuantity) || 0,
+        price: Number(form.price) || 0
+      });
+      onClose();
+    } catch (error) {
+      console.error('Failed to add ready belt:', error);
+      alert('Failed to add ready belt');
+    }
   };
+
+
 
   return (
     <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-lg mx-auto">
-      <h2 className="text-xl font-semibold">Add Finished Good</h2>
-      <input name="name" placeholder="Product Name" value={form.name} onChange={handleChange} className="border rounded w-full px-3 py-2" required />
-      <input name="currentStock" type="number" placeholder="Initial Stock" value={form.currentStock} onChange={handleChange} className="border rounded w-full px-3 py-2" />
-      <input name="pricePerUnit" type="number" placeholder="Price Per Unit" value={form.pricePerUnit} onChange={handleChange} className="border rounded w-full px-3 py-2" />
+      <h2 className="text-xl font-semibold">Add Ready Belt</h2>
+      <input name="type" placeholder="Belt Type" value={form.type} onChange={handleChange} className="border rounded w-full px-3 py-2" required />
+      <input name="size" placeholder="Belt Size" value={form.size} onChange={handleChange} className="border rounded w-full px-3 py-2" required />
+      <input name="quantity" type="number" placeholder="Initial Quantity" value={form.quantity} onChange={handleChange} className="border rounded w-full px-3 py-2" />
+      <input name="minQuantity" type="number" placeholder="Minimum Quantity" value={form.minQuantity} onChange={handleChange} className="border rounded w-full px-3 py-2" />
+      <input name="price" type="number" placeholder="Price Per Unit" value={form.price} onChange={handleChange} className="border rounded w-full px-3 py-2" />
+      <textarea name="notes" placeholder="Notes" value={form.notes} onChange={handleChange} className="border rounded w-full px-3 py-2" rows={3} />
+      
+      <div className="flex justify-end gap-3 pt-2">
+        <CancelButton onClick={onClose} />
+        <button type="submit" className="bg-primary-600 text-grey px-4 py-2 rounded">Save</button>
+      </div>
+    </form>
+  );
+
+  return (
+    <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-lg mx-auto">
+      <h2 className="text-xl font-semibold">Add Ready Belt</h2>
+      <input 
+        name="type" 
+        placeholder="Belt Type" 
+        value={form.type} 
+        onChange={handleChange} 
+        className="border rounded w-full px-3 py-2" 
+        required 
+      />
+      <input 
+        name="size" 
+        placeholder="Belt Size" 
+        value={form.size} 
+        onChange={handleChange} 
+        className="border rounded w-full px-3 py-2" 
+        required 
+      />
+      <input 
+        name="quantity" 
+        type="number" 
+        placeholder="Initial Quantity" 
+        value={form.quantity} 
+        onChange={handleChange} 
+        className="border rounded w-full px-3 py-2" 
+      />
+      <input 
+        name="minQuantity" 
+        type="number" 
+        placeholder="Minimum Quantity" 
+        value={form.minQuantity} 
+        onChange={handleChange} 
+        className="border rounded w-full px-3 py-2" 
+      />
+      <input 
+        name="price" 
+        type="number" 
+        placeholder="Price Per Unit" 
+        value={form.price} 
+        onChange={handleChange} 
+        className="border rounded w-full px-3 py-2" 
+      />
+      <textarea 
+        name="notes" 
+        placeholder="Notes" 
+        value={form.notes} 
+        onChange={handleChange} 
+        className="border rounded w-full px-3 py-2" 
+        rows={3} 
+      />
       
       <hr className="my-4" />
-      <h3 className="font-semibold text-lg">Bill of Materials</h3>
-      {loading && <p className="text-gray-500">Loading raw materials...</p>}
-      {error && <p className="text-red-600">Error: {error}</p>}
-      
-      <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-        {rawMaterials.map((material: any) => (
-          <div key={material.id} className="grid grid-cols-3 items-center gap-3">
-            <label className="col-span-2 text-gray-700">{material.name} ({material.unit})</label>
-            <input
-              type="number"
-              placeholder="Qty"
-              value={bom[material.id] || ""}
-              onChange={(e) => handleBomChange(material.id, e.target.value)}
-              className="border p-2 rounded w-full"
-            />
-          </div>
-        ))}
-      </div>
-      
-      <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-3 pt-2">
         <CancelButton onClick={onClose} />
         <PrimaryButton type="submit" variant="primary">Save</PrimaryButton>
       </div>

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { db } from "../../firebase/firebaseConfig.ts";
-import { collection, addDoc, serverTimestamp, doc, updateDoc } from "firebase/firestore";
+import { useWorkers } from "../../hooks/useWorkers";
 import CancelButton from "../ui/CancelButton.tsx";
 import PrimaryButton from "../ui/PrimaryButton.tsx";
 
 export default function AddWorkerForm({ onClose }: { onClose: () => void }) {
+  const { addWorker } = useWorkers();
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -20,15 +20,12 @@ export default function AddWorkerForm({ onClose }: { onClose: () => void }) {
     if (!form.name) return;
 
     try {
-      const docRef = await addDoc(collection(db, "workers"), {
+      await addWorker({
         ...form,
-        createdAt: serverTimestamp(),
+        salary: 0,
+        designation: form.role,
+        joiningDate: new Date()
       });
-
-      await updateDoc(doc(db, "workers", docRef.id), {
-        uid: docRef.id,
-      });
-
       onClose();
     } catch (error) {
       console.error("Error adding worker:", error);
