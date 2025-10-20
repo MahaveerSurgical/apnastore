@@ -5,7 +5,8 @@ import FormManager from "../FormManager";
 
 export default function AdminLayout() {
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex flex-col md:flex-row h-screen bg-gray-50">
+      {/* Sidebar is vertical on desktop, horizontal on mobile */}
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Topbar />

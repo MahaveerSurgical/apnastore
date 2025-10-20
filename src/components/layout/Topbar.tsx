@@ -1,4 +1,3 @@
-import React from 'react';
 import { logout } from '../../hooks/useAuth';
 import { useAuthContext } from '../../contexts/AuthContext';
 
@@ -14,7 +13,7 @@ export const Topbar = () => {
       <h1 className="text-lg font-semibold">Welcome, {worker?.name}</h1>
       <button
         onClick={handleLogout}
-        className="bg-primary-600 hover:bg-primary-700 text-white px-3 py-1 rounded"
+        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
       >
         Logout
       </button>
