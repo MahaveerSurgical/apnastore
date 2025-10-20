@@ -1,13 +1,10 @@
 import { useState } from 'react';
-import { useFirestoreCollection } from '../../hooks/useFirestoreCollection';
+import { useCustomers } from '../../hooks/useCustomers';
 import { Card } from '../../components/ui/Card';
-// import { Modal } from '../../components/ui/Modal';
-// import { db } from '../../firebase/firebaseConfig';
-// import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 export default function Customers() {
-  const { data: customers, loading, error } = useFirestoreCollection('customers');
+  const { customers, loading, error } = useCustomers();
   const [query, setQuery] = useState('');
   // const [isOpen, setIsOpen] = useState(false);
   // const [name, setName] = useState('');
