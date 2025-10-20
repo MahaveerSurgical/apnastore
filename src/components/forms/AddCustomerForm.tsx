@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { db } from "../../firebase/firebaseConfig.ts";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import CancelButton from "../ui/CancelButton.tsx";
+import PrimaryButton from "../ui/PrimaryButton.tsx";
 export default function AddCustomerForm({ onClose }: { onClose: () => void }) {
   const [form, setForm] = useState({
     name: "",
@@ -37,7 +38,7 @@ export default function AddCustomerForm({ onClose }: { onClose: () => void }) {
       {/* 2. Add action buttons */}
       <div className="flex justify-end gap-3 pt-2">
         <CancelButton onClick={onClose} />
-        <button type="submit" className="bg-primary-600 text-grey px-4 py-2 rounded">Save</button>
+        <PrimaryButton type="submit" variant="primary">Save</PrimaryButton>
       </div>
     </form>
   );

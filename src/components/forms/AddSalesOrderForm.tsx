@@ -3,6 +3,7 @@ import { db } from "../../firebase/firebaseConfig.ts";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
 import CancelButton from "../ui/CancelButton.tsx";
+import PrimaryButton from "../ui/PrimaryButton.tsx";
 
 // 1. Update the type to allow an empty string for quantity
 type OrderItem = {
@@ -101,7 +102,7 @@ export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) 
       
       <div className="flex justify-end gap-3 pt-2">
         <CancelButton onClick={onClose} />
-        <button type="submit" className="bg-primary-600 text-grey px-4 py-2 rounded">Save Order</button>
+        <PrimaryButton type="submit" variant="primary">Save</PrimaryButton>
       </div>
     </form>
   );

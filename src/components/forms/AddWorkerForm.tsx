@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { db } from "../../firebase/firebaseConfig.ts";
 import { collection, addDoc, serverTimestamp, doc, updateDoc } from "firebase/firestore";
-import CancelButton from "../ui/CancelButton.tsx"; // 1. Import the button
+import CancelButton from "../ui/CancelButton.tsx";
+import PrimaryButton from "../ui/PrimaryButton.tsx";
 
 export default function AddWorkerForm({ onClose }: { onClose: () => void }) {
   const [form, setForm] = useState({
@@ -62,12 +63,9 @@ export default function AddWorkerForm({ onClose }: { onClose: () => void }) {
         <option value="Admin">Admin</option>
       </select>
 
-      {/* 2. Add container for action buttons */}
       <div className="flex justify-end gap-3 pt-2">
         <CancelButton onClick={onClose} />
-        <button type="submit" className="bg-primary-600 text-grey px-4 py-2 rounded">
-          Save
-        </button>
+        <PrimaryButton type="submit" variant="primary">Save</PrimaryButton>
       </div>
     </form>
   );
