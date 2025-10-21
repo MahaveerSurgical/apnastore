@@ -5,6 +5,7 @@ import { useAuthContext } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
 import { Loading } from '../../components/ui/Loading';
 import { format } from 'date-fns';
+import PrimaryButton from '../../components/ui/PrimaryButton';
 
 export default function WorkerDashboard() {
   const { worker } = useAuthContext();
@@ -43,12 +44,12 @@ export default function WorkerDashboard() {
               <p><strong>Quantity:</strong> {o.quantity}</p>
               <p><strong>Created At:</strong> {format(o.createdAt?.toDate(), 'dd MMM yyyy')}</p>
             </div>
-            <button
-              className="bg-primary-600 text-white px-3 py-1 rounded"
+            <PrimaryButton 
+            variant="success"
               onClick={() => handleComplete(o)}
             >
               Mark Completed
-            </button>
+            </PrimaryButton>
           </div>
         </Card>
       ))}

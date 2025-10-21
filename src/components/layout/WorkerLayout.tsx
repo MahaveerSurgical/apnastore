@@ -2,6 +2,7 @@
 import React from 'react';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { logout } from '../../hooks/useAuth';
+import PrimaryButton from '../ui/PrimaryButton';
 
 interface WorkerLayoutProps {
   children: React.ReactNode;
@@ -23,12 +24,11 @@ export default function WorkerLayout({ children }: WorkerLayoutProps) {
       {/* Topbar */}
       <div className="bg-white border-b p-4 flex justify-between items-center">
         <span>Worker: {worker?.name}</span>
-        <button
-          onClick={handleLogout}
-          className="px-3 py-1 rounded-md bg-red-500 text-white hover:bg-red-600"
+        <PrimaryButton
+        onClick={handleLogout}variant="danger"        
         >
           Logout
-        </button>
+        </PrimaryButton>
       </div>
 
       {/* Page content */}

@@ -2,6 +2,8 @@ import { useFirestoreCollection } from '../../../hooks/useFirestoreCollection';
 import { db } from '../../../firebase/firebaseConfig';
 import { doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { Card } from '../../../components/ui/Card';
+import PrimaryButton from '../../../components/ui/PrimaryButton';
+import { Loading } from '../../../components/ui/Loading';
 
 export default function ProductionOrders() {
   const { data: productionOrders, loading: loadingOrders, error: errorOrders } = useFirestoreCollection('productionOrders');
@@ -49,7 +51,16 @@ export default function ProductionOrders() {
 
   return (
     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-      {(loadingOrders || loadingFg || loadingRm || loadingWorkers) && <div className="text-gray-500">Loading...</div>}
+      {(loadingOrders || loadingFg || loadingRm || loadingWorkers) && (<Loading 
+      message={
+      loadingOrders ? "Loading orders..." : 
+      loadingFg ? "Loading finished goods..." :
+      loadingRm ? "Loading raw materials..." :
+      loadingWorkers ? "Loading workers..." :
+      "Loading customers..."
+      } 
+    />
+  )}
       {(errorOrders || errorFg || errorRm || errorWorkers) && (
         <div className="text-red-600">{errorOrders || errorFg || errorRm || errorWorkers}</div>
       )}
@@ -66,12 +77,12 @@ export default function ProductionOrders() {
             <p>Assigned Worker: {worker?.name}</p>
             <p>Status: {order.status}</p>
             {order.status === 'Completed' && (
-              <button
-                className="mt-2 px-4 py-1 bg-green-500 text-white rounded"
+              <PrimaryButton
                 onClick={() => handleReceive(order)}
+                variant="success"
               >
                 Receive
-              </button>
+              </PrimaryButton>
             )}
           </Card>
         );
