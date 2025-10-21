@@ -1,6 +1,14 @@
 import { useFirestore } from './useFirestore';
 import { useFirestoreCollection } from './useFirestoreCollection';
 
+interface BillOfMaterials {
+  [materialId: string]: {
+    quantity: number;
+    materialName: string;
+    unit: string;
+  };
+}
+
 interface ReadyBelt {
   id?: string;
   type: string;
@@ -9,6 +17,7 @@ interface ReadyBelt {
   minQuantity?: number;
   price?: number;
   notes?: string;
+  billOfMaterials: BillOfMaterials;
   createdAt?: any;
   updatedAt?: any;
 }

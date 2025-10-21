@@ -104,13 +104,15 @@ export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) 
             </select>
             <input type="number" value={item.quantity} onChange={e => handleItemChange(idx, "quantity", e.target.value)} className="border rounded px-3 py-2 w-24" min="1" required />
             {items.length > 1 && (
-              <button type="button" onClick={() => removeItem(idx)} className="bg-red-500 text-white rounded px-2 py-1 text-xs">Remove</button>
+
+        <PrimaryButton onClick={() => removeItem(idx)}variant="danger" >remove</PrimaryButton>
+
             )}
           </div>
         ))}
       </div>
 
-      <button type="button" onClick={addItem} className="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded transition-colors">+ Add Item</button>
+      <PrimaryButton variant="success" onClick={addItem} >+ Add Item</PrimaryButton>
 
       <div className="text-right font-bold text-lg pt-2">
         Total: ₹{totalAmount.toFixed(2)}
