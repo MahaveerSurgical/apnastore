@@ -7,4 +7,4 @@ export const Loading: React.FC<{ message?: string }> = ({ message }) => {
       <p className="text-gray-600">{message || 'Loading...'}</p>
     </div>
   );
-};
+}
