@@ -1,6 +1,6 @@
 // src/hooks/useAuth.ts
 import { signInWithEmailAndPassword, signOut as firebaseSignOut } from '../firebase/firebaseConfig';
-import { auth, googleProvider, signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier } from '../firebase/firebaseConfig';
+import { auth, googleProvider, signInWithPopup } from '../firebase/firebaseConfig';
 import { db, doc, getDoc, setDoc, serverTimestamp } from '../firebase/firebaseConfig';
 
 /**
@@ -45,43 +45,6 @@ export const loginWithGoogle = async () => {
   }
 };
 
-/** Initialize reCAPTCHA verifier */
-export const setupRecaptcha = (containerId: string) => {
-  return new RecaptchaVerifier(
-    auth,
-    containerId,
-    {
-      size: 'invisible',
-      callback: (response: unknown) => {
-        console.log('reCAPTCHA verified:', response);
-      },
-    }
-  );
-};
-
-/** Send OTP to phone number */
-export const sendOTP = async (phoneNumber: string, recaptchaVerifier: RecaptchaVerifier) => {
-  try {
-    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-    return confirmationResult; // Save for later verification
-  } catch (error: any) {
-    console.error('Send OTP error:', error);
-    throw new Error(error.message);
-  }
-};
-
-/** Confirm OTP */
-export const verifyOTP = async (confirmationResult: any, code: string) => {
-  try {
-    const userCredential = await confirmationResult.confirm(code);
-    const user = userCredential.user;
-    await ensureWorkerProfile(user);
-    return user;
-  } catch (error: any) {
-    console.error('Verify OTP error:', error);
-    throw new Error(error.message);
-  }
-};
 
 /** Ensure a worker profile exists for the signed-in user */
 const ensureWorkerProfile = async (user: any) => {
@@ -94,7 +57,6 @@ const ensureWorkerProfile = async (user: any) => {
     uid: user.uid,
     name: displayName,
     role: 'Contract',
-    phone: user.phoneNumber || null,
     createdAt: serverTimestamp(),
   });
 };

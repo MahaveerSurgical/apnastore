@@ -6,8 +6,6 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
 } from 'firebase/auth';
 import {
   getFirestore,
@@ -46,8 +44,6 @@ export {
   signOut,
   signInWithPopup,
   GoogleAuthProvider,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
   collection,
   doc,
   getDoc,

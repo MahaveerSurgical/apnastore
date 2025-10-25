@@ -4,7 +4,6 @@ import { serverTimestamp } from '../../firebase/firebaseConfig';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
 import { Loading } from '../../components/ui/Loading';
-import { format } from 'date-fns';
 import PrimaryButton from '../../components/ui/PrimaryButton';
 
 export default function WorkerDashboard() {
@@ -42,7 +41,6 @@ export default function WorkerDashboard() {
             <div>
               <p><strong>Order ID:</strong> {o.id}</p>
               <p><strong>Quantity:</strong> {o.quantity}</p>
-              <p><strong>Created At:</strong> {format(o.createdAt?.toDate(), 'dd MMM yyyy')}</p>
             </div>
             <PrimaryButton 
             variant="success"
