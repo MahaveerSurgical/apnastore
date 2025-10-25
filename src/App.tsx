@@ -5,6 +5,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { AdminRoute } from './routes/AdminRoute';
 import { WorkerRoute } from './routes/WorkerRoute';
 import {Loading} from './components/ui/Loading';
+import SignUp from './pages/Signup';
+
 
 // Lazy load pages
 const Login = lazy(() => import('./pages/Login'));
@@ -24,22 +26,28 @@ const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
 const WorkerLayout = lazy(() => import('./components/layout/WorkerLayout'));
 
 export default function App() {
+  // Import PendingApproval page
+  const PendingApproval = lazy(() => import('./pages/PendingApproval'));
+
   return (
     <AuthProvider>
-        <Suspense fallback={<Loading message="Loading application..." />}>
-        </Suspense>
+      <Suspense fallback={<Loading message="Loading application..." />}> </Suspense>
       <Routes>
         {/* Login */}
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/pending-approval" element={
+          <Suspense fallback={<Loading message="Loading approval page..." />}> <PendingApproval /> </Suspense>
+        } />
 
         {/* Admin routes */}
         <Route
           path="/*"
           element={
             <AdminRoute>
-            <Suspense fallback={<Loading message="Loading admin panel..." />}>
-              <AdminLayout />
-            </Suspense>
+              <Suspense fallback={<Loading message="Loading admin panel..." />}> 
+              <AdminLayout /> 
+              </Suspense>
             </AdminRoute>
           }
         >

@@ -6,6 +6,8 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
+  createUserWithEmailAndPassword,
+  updateProfile,
 } from 'firebase/auth';
 import {
   getFirestore,
@@ -50,4 +52,6 @@ export {
   setDoc,
   runTransaction,
   serverTimestamp,
+  createUserWithEmailAndPassword,
+  updateProfile,
 };

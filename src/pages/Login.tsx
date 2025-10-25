@@ -1,6 +1,6 @@
 // src/pages/Login.tsx
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { login, loginWithGoogle } from '../hooks/useAuth';
 import { useAuthContext } from '../contexts/AuthContext';
 
@@ -10,30 +10,28 @@ export default function Login() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState(''); // ✅ New name field
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Redirect as soon as worker profile is available
   useEffect(() => {
     if (!worker) return;
     if (worker.role === 'Admin') navigate('/', { replace: true });
     else if (worker.role === 'Contract') navigate('/worker-dashboard', { replace: true });
   }, [worker, navigate]);
 
-  // Handle Email/Password login
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(email, password);
+      await login(email, password, name); // ✅ Pass name
     } catch (err: any) {
       setError(err.message);
     }
     setLoading(false);
   };
 
-  // Handle Google login
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
@@ -52,6 +50,13 @@ export default function Login() {
         {error && <div className="text-red-500 mb-4">{error}</div>}
 
         <form onSubmit={handleEmailLogin} className="flex flex-col space-y-4">
+          <input
+            type="text"
+            placeholder="Name (optional)"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="border rounded px-3 py-2 w-full"
+          />
           <input
             type="email"
             placeholder="Email"
@@ -86,6 +91,13 @@ export default function Login() {
             {loading ? 'Logging in...' : 'Login with Google'}
           </button>
         </div>
+
+        <p className="mt-4 text-center text-sm">
+          Don’t have an account?{' '}
+          <Link to="/signup" className="text-primary-600 hover:underline">
+            Sign Up
+          </Link>
+        </p>
       </div>
     </div>
   );

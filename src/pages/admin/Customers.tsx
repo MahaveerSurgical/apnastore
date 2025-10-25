@@ -2,35 +2,12 @@ import { useState } from 'react';
 import { useCustomers } from '../../hooks/useCustomers';
 import { Card } from '../../components/ui/Card';
 import { Loading } from '../../components/ui/Loading';
-// import { Modal } from '../../components/ui/Modal';
-// import { db } from '../../firebase/firebaseConfig';
-// import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 export default function Customers() {
   const { customers, loading, error } = useCustomers();
   const [query, setQuery] = useState('');
-  // const [isOpen, setIsOpen] = useState(false);
-  // const [name, setName] = useState('');
-  // const [phone, setPhone] = useState('');
-  // const [address, setAddress] = useState('');
   const navigate = useNavigate();
-
-  // const handleAdd = async () => {
-  //   try {
-  //     await addDoc(collection(db, 'customers'), {
-  //       name,
-  //       phone,
-  //       address,
-  //       notes: '',
-  //       pendingAmount: 0,
-  //       createdAt: serverTimestamp()
-  //     });
-  //     setIsOpen(false);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
 
   return (
     <div className="p-6">
@@ -64,36 +41,7 @@ export default function Customers() {
           </Card>
         ))}
       </div>
-      {/* <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-primary-500 text-grey rounded-full w-14 h-14 text-3xl"
-      >
-        +
-      </button> */}
 
-      {/* <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Add Customer">
-        <input
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full border p-2 rounded mb-2"
-        />
-        <input
-          placeholder="Phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="w-full border p-2 rounded mb-2"
-        />
-        <input
-          placeholder="Address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className="w-full border p-2 rounded mb-2"
-        />
-        <button onClick={handleAdd} className="bg-primary-500 text-blue px-4 py-2 rounded">
-          Add
-        </button>
-      </Modal> */}
     </div>
   );
 }
