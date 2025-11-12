@@ -1,5 +1,5 @@
-import { useFirestore } from './useFirestore';
-import { useFirestoreCollection } from './useFirestoreCollection';
+import { useFirestore } from '../firestore/useFirestore';
+import { useFirestoreCollection } from '../firestore/useFirestoreCollection';
 
 interface BillOfMaterials {
   [materialId: string]: {
@@ -10,12 +10,12 @@ interface BillOfMaterials {
 }
 
 interface ReadyBelt {
-  id?: string;
+  id: string;
   type: string;
   size: string;
-  quantity: number;
+  currentStock: number;
   minQuantity?: number;
-  price?: number;
+  price: number;
   notes?: string;
   billOfMaterials: BillOfMaterials;
   createdAt?: any;
@@ -32,6 +32,6 @@ export function useReadyBelts() {
     error,
     addReadyBelt: add,
     updateReadyBelt: update,
-    deleteReadyBelt: remove
+    deleteReadyBelt: remove,
   };
 }

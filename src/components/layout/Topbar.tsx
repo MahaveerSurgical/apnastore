@@ -1,4 +1,4 @@
-import { logout } from '../../hooks/useAuth';
+import { logout } from '../../hooks/auth/useAuth';
 import { useAuthContext } from '../../contexts/AuthContext';
 import  PrimaryButton from '../ui/PrimaryButton';
 

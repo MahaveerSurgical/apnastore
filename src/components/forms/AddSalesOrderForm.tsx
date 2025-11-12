@@ -1,13 +1,15 @@
 import React, { useState, useMemo } from "react";
-import { useSalesOrders } from "../../hooks/useSalesOrders";
-import { useCustomers } from "../../hooks/useCustomers";
-import { useReadyBelts } from "../../hooks/useReadyBelts";
+import { useSalesOrders } from "../../hooks/domain/useSalesOrders.ts";
+import { useCustomers } from "../../hooks/domain/useCustomers.ts";
+import { useReadyBelts } from "../../hooks/domain/useReadyBelts.ts";
 import CancelButton from "../ui/CancelButton.tsx";
 import PrimaryButton from "../ui/PrimaryButton.tsx";
 import SearchableDropdown from "../ui/SearchableDropdown";
 
 type OrderItem = {
-  beltType: string;
+  readyBeltsId: string;
+  type: string;
+  size: string;
   quantity: number | '';
   price: number;
 };
@@ -15,40 +17,54 @@ type OrderItem = {
 export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) {
   const { addSalesOrder } = useSalesOrders();
   const { customers, loading: loadingCust } = useCustomers();
-  const { readyBelts, loading: loadingFg } = useReadyBelts();
+  const { readyBelts, loading: loadingRb } = useReadyBelts();
   
   const [customerId, setCustomerId] = useState("");
-  const [items, setItems] = useState<OrderItem[]>([{ beltType: "", quantity: 1, price: 0 }]);
+  const [items, setItems] = useState<OrderItem[]>([{readyBeltsId: "", type: "",size:"", quantity: 1, price: 0 }]);
 
 
   const totalAmount = useMemo(() => {
     return items.reduce((total, item) => {
-      const belt = readyBelts.find(b => b.id === item.beltType);
+      const belt = readyBelts.find(b => b.id === item.readyBeltsId);
       const price = belt?.price || 0;
       const quantity = Number(item.quantity) || 0;
       return total + (price * quantity);
     }, 0);
   }, [items, readyBelts]);
 
-  // 3. Simplify the handler to accept the raw string from the input
+  // Handle item changes - when belt is selected, extract type, size, and price from readyBelt
   const handleItemChange = (index: number, field: keyof OrderItem, value: string) => {
     const newItems = [...items];
     if (field === 'quantity') {
       // Allow empty string, otherwise convert to number
       newItems[index] = { ...newItems[index], quantity: value === '' ? '' : parseInt(value, 10) };
+    } else if (field === 'readyBeltsId') {
+      // When a belt is selected, extract its type, size, and price
+      const selectedBelt = readyBelts.find(b => b.id === value);
+      if (selectedBelt) {
+        newItems[index] = {
+          ...newItems[index],
+          readyBeltsId: value,
+          type: selectedBelt.type,
+          size: selectedBelt.size,
+          price: selectedBelt.price
+        };
+      } else {
+        newItems[index] = { ...newItems[index], readyBeltsId: value, type: "", size: "", price: 0 };
+      }
     } else {
       newItems[index] = { ...newItems[index], [field]: value };
     }
     setItems(newItems);
   };
 
-  const addItem = () => setItems([...items, { beltType: "", quantity: 1, price: 0 }]);
+  const addItem = () => setItems([...items, { readyBeltsId: "",type: "",size:"", quantity: 1, price: 0 }]);
   const removeItem = (index: number) => setItems(items.filter((_, i) => i !== index));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerId || items.some(i => !i.beltType || i.quantity === '')) {
-        alert("Please select a customer and ensure all items have a belt type and quantity.");
+    if (!customerId || items.some(i => !i.readyBeltsId || i.quantity === '')) {
+        alert("Please select a customer and ensure all items have a belt selected and quantity.");
         return;
     }
 
@@ -64,8 +80,11 @@ export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) 
         customerId,
         customerName: selectedCustomer.name,
         items: items.map(item => ({
-          ...item,
+          readyBeltsId: item.readyBeltsId,
+          type: item.type,
+          size: item.size,
           quantity: Number(item.quantity) || 0,
+          price: item.price
         })),
         status: 'pending',
         totalAmount,
@@ -80,7 +99,7 @@ export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) 
     }
   };
 
-  if (loadingCust || loadingFg) {
+  if (loadingCust || loadingRb) {
     return <div className="p-4 text-center">Loading options...</div>;
   }
 
@@ -107,8 +126,8 @@ export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) 
                   id: belt.id!, 
                   label: `${belt.type} - ${belt.size} (₹${belt.price})`
                 }))}
-                value={item.beltType}
-                onChange={(value) => handleItemChange(idx, "beltType", value)}
+                value={item.readyBeltsId}
+                onChange={(value) => handleItemChange(idx, "readyBeltsId", value)}
                 placeholder="Select Belt Type"
                 required
               />

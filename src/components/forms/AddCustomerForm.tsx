@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useCustomers } from "../../hooks/useCustomers";
+import { useCustomers } from "../../hooks/domain/useCustomers.ts";
 import CancelButton from "../ui/CancelButton.tsx";
 import PrimaryButton from "../ui/PrimaryButton.tsx";
 export default function AddCustomerForm({ onClose }: { onClose: () => void }) {
@@ -17,7 +17,7 @@ export default function AddCustomerForm({ onClose }: { onClose: () => void }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.phone) return; // Basic validation
+    if (!form.name || !form.phone) return; 
 
     await addCustomer({
       ...form,
@@ -34,7 +34,6 @@ export default function AddCustomerForm({ onClose }: { onClose: () => void }) {
       <input name="address" placeholder="Address" value={form.address} onChange={handleChange} className="border rounded w-full px-3 py-2" />
       <textarea name="notes" placeholder="Notes (e.g., special instructions, GSTIN)" value={form.notes} onChange={handleChange} className="border rounded w-full px-3 py-2" rows={3} />
       
-      {/* 2. Add action buttons */}
       <div className="flex justify-end gap-3 pt-2">
         <CancelButton onClick={onClose} />
         <PrimaryButton type="submit" variant="primary">Save</PrimaryButton>

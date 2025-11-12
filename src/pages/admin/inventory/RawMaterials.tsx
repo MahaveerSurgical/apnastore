@@ -1,10 +1,21 @@
-// import { useState } from 'react';
-import { useFirestoreCollection } from '../../../hooks/useFirestoreCollection';
+import { useRawMaterials } from '../../../hooks/domain/useRawMaterials';
 import { Card } from '../../../components/ui/Card';
+import PrimaryButton from '../../../components/ui/PrimaryButton';
 import { Loading } from '../../../components/ui/Loading';
 
 export default function RawMaterials() {
-  const { data: rawMaterials, loading, error } = useFirestoreCollection('rawMaterials');
+  const { rawMaterials, loading, error, deleteRawMaterial } = useRawMaterials();
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this raw material?')) {
+      try {
+        await deleteRawMaterial(id);
+      } catch (err) {
+        console.error('Error deleting raw material:', err);
+        alert('Failed to delete raw material');
+      }
+    }
+  };
 
   return (
     <div className="p-6">
@@ -19,6 +30,14 @@ export default function RawMaterials() {
           <Card key={rm.id} title={rm.name}>
             <p>Stock: {rm.currentStock} {rm.unit}</p>
             <p>Reorder Point: {rm.reorderPoint}</p>
+            <div className="mt-4">
+              <PrimaryButton
+                variant="danger"
+                onClick={() => handleDelete(rm.id)}
+              >
+                Delete
+              </PrimaryButton>
+            </div>
           </Card>
         ))}
       </div>

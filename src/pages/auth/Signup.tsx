@@ -1,7 +1,7 @@
 // src/pages/SignUp.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signup } from '../hooks/useAuth';
+import { signup } from '../../hooks/auth/useAuth';
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ export default function SignUp() {
     name: '',
     email: '',
     password: '',
-    role: '', // 'Admin' | 'Contract' | 'Delivery'
+    role: '', // 'Admin' | 'Contract' | 'Delivery' |'Pending'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

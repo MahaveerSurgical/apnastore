@@ -5,11 +5,10 @@ import { AuthProvider } from './contexts/AuthContext';
 import { AdminRoute } from './routes/AdminRoute';
 import { WorkerRoute } from './routes/WorkerRoute';
 import {Loading} from './components/ui/Loading';
-import SignUp from './pages/Signup';
 
 
 // Lazy load pages
-const Login = lazy(() => import('./pages/Login'));
+const Login = lazy(() => import('./pages/auth/Login'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const Customers = lazy(() => import('./pages/admin/Customers'));
 const CustomerDetail = lazy(() => import('./pages/admin/CustomerDetail'));
@@ -19,6 +18,8 @@ const ReadyBelts = lazy(() => import('./pages/admin/inventory/ReadyBelts'));
 const ProductionOrders = lazy(() => import('./pages/admin/orders/ProductionOrders'));
 const SalesOrders = lazy(() => import('./pages/admin/orders/SalesOrders'));
 const WorkerDashboard = lazy(() => import('./pages/worker/WorkerDashboard'));
+const SignUp = lazy(() => import('./pages/auth/Signup'));
+const Test = lazy(() => import('./pages/Test'));
 
 
 // Lazy load layouts
@@ -27,7 +28,7 @@ const WorkerLayout = lazy(() => import('./components/layout/WorkerLayout'));
 
 export default function App() {
   // Import PendingApproval page
-  const PendingApproval = lazy(() => import('./pages/PendingApproval'));
+  const PendingApproval = lazy(() => import('./pages/auth/PendingApproval'));
 
   return (
     <AuthProvider>
@@ -129,6 +130,16 @@ export default function App() {
                 </Suspense>
             </WorkerRoute>
           }
+        />
+
+        {/* Diagnostic Route */}
+        <Route 
+          path="/test" 
+          element={
+            <Suspense fallback={<Loading message="Loading diagnostics..." />}>
+              <Test />
+            </Suspense>
+          } 
         />
 
         {/* Catch all unknown routes */}

@@ -5,13 +5,11 @@ import {
   signOut as firebaseSignOut,
   signInWithPopup,
   updateProfile,
-} from '../firebase/firebaseConfig';
-import { auth, googleProvider, db } from '../firebase/firebaseConfig';
+} from '../../firebase/firebaseConfig';
+import { auth, googleProvider, db } from '../../firebase/firebaseConfig';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
-/* -------------------------------------------------------------------------- */
-/*                               LOGIN FUNCTION                               */
-/* -------------------------------------------------------------------------- */
+// LOGIN FUNCTION
 export const login = async (email: string, password: string, name?: string) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -26,9 +24,7 @@ export const login = async (email: string, password: string, name?: string) => {
   }
 };
 
-/* -------------------------------------------------------------------------- */
-/*                               SIGNUP FUNCTION                              */
-/* -------------------------------------------------------------------------- */
+// SIGNUP FUNCTION
 export const signup = async (
   name: string,
   email: string,
@@ -43,17 +39,13 @@ export const signup = async (
     // Update Firebase Auth displayName
     await updateProfile(user, { displayName: name });
 
-    // Determine if role is immediately approved
-    const isPending = role === 'Admin' || role === 'Delivery';
-    const assignedRole = isPending ? null : role;
-
-    // Create worker doc
+// Instead of isApproval, set pending by default
     await setDoc(doc(db, 'workers', user.uid), {
       uid: user.uid,
       name,
       email,
-      role: assignedRole,
-      approved: !isPending,
+      role: 'Pending',         // default state
+      askedRole: role,         // store requested role
       createdAt: serverTimestamp(),
     });
 
@@ -92,35 +84,47 @@ export const loginWithGoogle = async () => {
   }
 };
 
-/* -------------------------------------------------------------------------- */
-/*                  ENSURE WORKER PROFILE EXISTS OR CREATE ONE                */
-/* -------------------------------------------------------------------------- */
+//   ENSURE WORKER PROFILE EXISTS OR CREATE ONE
 const ensureWorkerProfile = async (user: any, name?: string) => {
   if (!user?.uid) return;
+
+  console.group('%c👤 Worker Profile Check', 'color: #9C27B0; font-weight: bold');
+  console.log('🆔 User:', { uid: user.uid, email: user.email });
 
   const workerRef = doc(db, 'workers', user.uid);
   const snap = await getDoc(workerRef);
 
   if (snap.exists()) {
-    // Update name if missing or outdated
     const data = snap.data();
+    console.log('📄 Existing worker doc:', data);
+    // Update name if missing or outdated
     if (!data.name && name) {
+      console.log('✏️ Updating worker name:', name);
       await setDoc(
         workerRef,
         { name, updatedAt: serverTimestamp() },
         { merge: true }
       );
     }
+    console.groupEnd();
     return;
   }
 
   const displayName = name || user.displayName || user.email || 'User';
+  console.log('📝 Creating new worker doc:', {
+    uid: user.uid,
+    name: displayName,
+    role: 'Pending'
+  });
+
   await setDoc(workerRef, {
     uid: user.uid,
     name: displayName,
     email: user.email,
-    role: 'Contract', // Default for unclassified users
-    approved: true,
+    role: 'Pending', // Default for unclassified users
+    askedRole: '',
     createdAt: serverTimestamp(),
   });
-};
+  
+  console.groupEnd();
+}

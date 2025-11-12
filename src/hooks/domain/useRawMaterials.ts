@@ -1,13 +1,12 @@
-import { useFirestore } from './useFirestore';
-import { useFirestoreCollection } from './useFirestoreCollection';
+import { useFirestore } from '../firestore/useFirestore';
+import { useFirestoreCollection } from '../firestore/useFirestoreCollection';
 
 interface RawMaterial {
   id?: string;
   name: string;
-  type: string;
-  quantity: number;
+  currentStock: number;
   unit: string;
-  minQuantity?: number;
+  reoderPoint: number;
   supplier?: string;
   price?: number;
   notes?: string;

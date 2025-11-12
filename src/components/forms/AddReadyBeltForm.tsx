@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useReadyBelts } from "../../hooks/useReadyBelts";
-import { useRawMaterials } from "../../hooks/useRawMaterials";
+import { useReadyBelts } from "../../hooks/domain/useReadyBelts";
+import { useRawMaterials } from "../../hooks/domain/useRawMaterials";
 import CancelButton from "../ui/CancelButton";
 import PrimaryButton from "../ui/PrimaryButton";
 
@@ -74,7 +74,7 @@ export default function AddReadyBeltForm({ onClose }: { onClose: () => void }) {
     try {
       await addReadyBelt({
         ...form,
-        quantity: Number(form.quantity) || 0,
+        currentStock: Number(form.quantity) || 0,
         minQuantity: Number(form.minQuantity) || 0,
         price: Number(form.price) || 0,
         billOfMaterials
@@ -185,66 +185,6 @@ export default function AddReadyBeltForm({ onClose }: { onClose: () => void }) {
       </div>
       
       <div className="flex justify-end gap-3 pt-4 border-t mt-4">
-        <CancelButton onClick={onClose} />
-        <PrimaryButton type="submit" variant="primary">Save</PrimaryButton>
-      </div>
-    </form>
-  );
-
-  return (
-    <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-lg mx-auto">
-      <h2 className="text-xl font-semibold">Add Ready Belt</h2>
-      <input 
-        name="type" 
-        placeholder="Belt Type" 
-        value={form.type} 
-        onChange={handleChange} 
-        className="border rounded w-full px-3 py-2" 
-        required 
-      />
-      <input 
-        name="size" 
-        placeholder="Belt Size" 
-        value={form.size} 
-        onChange={handleChange} 
-        className="border rounded w-full px-3 py-2" 
-        required 
-      />
-      <input 
-        name="quantity" 
-        type="number" 
-        placeholder="Initial Quantity" 
-        value={form.quantity} 
-        onChange={handleChange} 
-        className="border rounded w-full px-3 py-2" 
-      />
-      <input 
-        name="minQuantity" 
-        type="number" 
-        placeholder="Minimum Quantity" 
-        value={form.minQuantity} 
-        onChange={handleChange} 
-        className="border rounded w-full px-3 py-2" 
-      />
-      <input 
-        name="price" 
-        type="number" 
-        placeholder="Price Per Unit" 
-        value={form.price} 
-        onChange={handleChange} 
-        className="border rounded w-full px-3 py-2" 
-      />
-      <textarea 
-        name="notes" 
-        placeholder="Notes" 
-        value={form.notes} 
-        onChange={handleChange} 
-        className="border rounded w-full px-3 py-2" 
-        rows={3} 
-      />
-      
-      <hr className="my-4" />
-            <div className="flex justify-end gap-3 pt-2">
         <CancelButton onClick={onClose} />
         <PrimaryButton type="submit" variant="primary">Save</PrimaryButton>
       </div>

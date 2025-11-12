@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useRawMaterials } from "../../hooks/useRawMaterials";
+import { useRawMaterials } from "../../hooks/domain/useRawMaterials.ts";
 import CancelButton from "../ui/CancelButton.tsx";
 import PrimaryButton from "../ui/PrimaryButton.tsx";
 
@@ -8,12 +8,11 @@ export default function AddRawMaterialForm({ onClose }: { onClose: () => void })
   
   const [form, setForm] = useState({
     name: "",
-    type: "",
     unit: "kg",
-    quantity: 0 as number | '',
-    minQuantity: 10 as number | '',
+    currentStock: 0 as number | '',
+    reorderPoint: 10 as number | '',
     supplier: "",
-    price: 0 as number | '',
+    pricerm: 0 as number | '',
     notes: ""
   });
 
@@ -29,14 +28,14 @@ export default function AddRawMaterialForm({ onClose }: { onClose: () => void })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.type) return;
+    if (!form.name) return;
 
     try {
       await addRawMaterial({
         ...form,
-        quantity: Number(form.quantity) || 0,
-        minQuantity: Number(form.minQuantity) || 0,
-        price: Number(form.price) || 0
+        currentStock: Number(form.currentStock) || 0,
+        reoderPoint: Number(form.reorderPoint) || 0,
+        price: Number(form.pricerm) || 0
       });
       onClose();
     } catch (error) {
@@ -49,16 +48,15 @@ export default function AddRawMaterialForm({ onClose }: { onClose: () => void })
     <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-lg mx-auto">
       <h2 className="text-xl font-semibold">Add Raw Material</h2>
       <input name="name" placeholder="Material Name" value={form.name} onChange={handleChange} className="border rounded w-full px-3 py-2" required />
-      <input name="type" placeholder="Material Type" value={form.type} onChange={handleChange} className="border rounded w-full px-3 py-2" required />
       <select name="unit" value={form.unit} onChange={handleChange} className="border rounded w-full px-3 py-2">
         <option value="kg">Kilograms (kg)</option>
         <option value="pcs">Pieces (pcs)</option>
         <option value="m">Meters (m)</option>
       </select>
-      <input name="quantity" type="number" placeholder="Current Quantity" value={form.quantity} onChange={handleChange} className="border rounded w-full px-3 py-2" />
-      <input name="minQuantity" type="number" placeholder="Minimum Quantity" value={form.minQuantity} onChange={handleChange} className="border rounded w-full px-3 py-2" />
+      <input name="currentStock" type="number" placeholder="Current Quantity" value={form.currentStock} onChange={handleChange} className="border rounded w-full px-3 py-2" />
+      <input name="reorderPoint" type="number" placeholder="Minimum Quantity" value={form.reorderPoint} onChange={handleChange} className="border rounded w-full px-3 py-2" />
       <input name="supplier" placeholder="Supplier Name" value={form.supplier} onChange={handleChange} className="border rounded w-full px-3 py-2" />
-      <input name="price" type="number" placeholder="Price per Unit" value={form.price} onChange={handleChange} className="border rounded w-full px-3 py-2" />
+      <input name="pricerm" type="number" placeholder="Price per Unit" value={form.pricerm} onChange={handleChange} className="border rounded w-full px-3 py-2" />
       <textarea name="notes" placeholder="Notes" value={form.notes} onChange={handleChange} className="border rounded w-full px-3 py-2" rows={3} />
       
       <div className="flex justify-end gap-3 pt-2">

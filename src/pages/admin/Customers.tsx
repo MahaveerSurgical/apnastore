@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useCustomers } from '../../hooks/useCustomers';
+import { useCustomers } from '../../hooks/domain/useCustomers';
 import { Card } from '../../components/ui/Card';
 import { Loading } from '../../components/ui/Loading';
 import { useNavigate } from 'react-router-dom';

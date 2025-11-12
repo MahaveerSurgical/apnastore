@@ -1,8 +1,8 @@
 // src/pages/Login.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login, loginWithGoogle } from '../hooks/useAuth';
-import { useAuthContext } from '../contexts/AuthContext';
+import { login, loginWithGoogle } from '../../hooks/auth/useAuth';
+import { useAuthContext } from '../../contexts/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();

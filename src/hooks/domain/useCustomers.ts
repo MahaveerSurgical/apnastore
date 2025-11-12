@@ -1,5 +1,5 @@
-import { useFirestore } from './useFirestore';
-import { useFirestoreCollection } from './useFirestoreCollection';
+import { useFirestore } from '../firestore/useFirestore';
+import { useFirestoreCollection } from '../firestore/useFirestoreCollection';
 
 interface Customer {
   id?: string;

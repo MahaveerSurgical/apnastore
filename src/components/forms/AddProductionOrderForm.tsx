@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useProductionOrders } from "../../hooks/useProductionOrders";
-import { useWorkers } from "../../hooks/useWorkers";
-import { useReadyBelts } from "../../hooks/useReadyBelts";
+import { useProductionOrders } from "../../hooks/domain/useProductionOrders.ts";
+import { useWorkers } from "../../hooks/domain/useWorkers.ts";
+import { useReadyBelts } from "../../hooks/domain/useReadyBelts.ts";
 import CancelButton from "../ui/CancelButton.tsx";
 import PrimaryButton from "../ui/PrimaryButton.tsx";
 
@@ -10,10 +10,18 @@ export default function AddProductionOrderForm({ onClose }: { onClose: () => voi
   const { readyBelts, loading: loadingFg } = useReadyBelts();
   const { workers, loading: loadingWorkers } = useWorkers();
 
-  const [form, setForm] = useState({
-    finishedGoodId: "",
-    assignedWorkerId: "",
-    quantity: 1 as number | '',
+  interface ProductionOrderForm {
+    readyBeltsId: string;
+    workerId: string;
+    quantity: number | '';
+    pricePerUnit: number | '';
+  }
+
+  const [form, setForm] = useState<ProductionOrderForm>({
+    readyBeltsId: "",
+    workerId: "",
+    quantity: 1,
+    pricePerUnit: 0,
   });
   
   const contractWorkers = workers.filter((worker: any) => worker.role === 'Contract');
@@ -27,32 +35,44 @@ export default function AddProductionOrderForm({ onClose }: { onClose: () => voi
     }
   };
 
-  // The fix is here: Changed React.Event to React.FormEvent
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.finishedGoodId || !form.assignedWorkerId || form.quantity === '') {
-      alert("Please fill out all fields and enter a valid quantity.");
+    if (!form.readyBeltsId || !form.workerId || form.quantity === '' || form.pricePerUnit === '') {
+      alert("Please fill out all fields and enter valid quantity and price.");
       return;
     }
 
-    const selectedWorker = workers.find(w => w.id === form.assignedWorkerId);
-    const selectedBelt = readyBelts.find(b => b.id === form.finishedGoodId);
+    const selectedWorker = workers.find(w => w.id === form.workerId || w.uid === form.workerId);
+    const selectedBelt = readyBelts.find(b => b.id === form.readyBeltsId);
 
-    if (!selectedWorker || !selectedBelt) {
+    if (!selectedWorker || !selectedBelt || !selectedBelt.id) {
       alert("Invalid worker or belt selection");
       return;
     }
 
+    // Ensure we have a valid worker ID
+    const workerId = selectedWorker.uid || selectedWorker.id;
+    if (!workerId) {
+      alert("Invalid worker ID");
+      return;
+    }
+
+    const quantity = Number(form.quantity) || 0;
+    const pricePerUnit = Number(form.pricePerUnit) || 0;
+
     try {
       await addProductionOrder({
         orderNumber: `PO-${Date.now()}`,
-        workerId: form.assignedWorkerId,
+        workerId,
         workerName: selectedWorker.name,
         beltType: selectedBelt.type,
-        quantity: Number(form.quantity) || 0,
+        readyBeltsId: selectedBelt.id,
+        quantity,
         status: 'pending',
         startDate: new Date(),
-        notes: ''
+        notes: '',
+        pricePerUnit,
+        totalAmount: quantity * pricePerUnit,
       });
       onClose();
     } catch (error) {
@@ -68,7 +88,7 @@ export default function AddProductionOrderForm({ onClose }: { onClose: () => voi
   return (
     <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-lg mx-auto">
       <h2 className="text-xl font-semibold">Create Production Order</h2>
-      <select name="finishedGoodId" value={form.finishedGoodId} onChange={handleChange} className="border rounded w-full px-3 py-2" required>
+      <select name="readyBeltsId" value={form.readyBeltsId} onChange={handleChange} className="border rounded w-full px-3 py-2" required>
         <option value="" disabled>Select Belt Type</option>
         {readyBelts.map(belt => (
           <option key={belt.id} value={belt.id}>
@@ -76,12 +96,19 @@ export default function AddProductionOrderForm({ onClose }: { onClose: () => voi
           </option>
         ))}
       </select>
-      <select name="assignedWorkerId" value={form.assignedWorkerId} onChange={handleChange} className="border rounded w-full px-3 py-2" required>
+      <select name="workerId" value={form.workerId} onChange={handleChange} className="border rounded w-full px-3 py-2" required>
         <option value="" disabled>Select Contract Worker</option>
-        {contractWorkers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+        {contractWorkers.map(w => <option key={w.id} value={w.id || w.uid}>{w.name}</option>)}
       </select>
       <input name="quantity" type="number" placeholder="Quantity" value={form.quantity} onChange={handleChange} className="border rounded w-full px-3 py-2" min="1" required />
+      <input name="pricePerUnit" type="number" placeholder="Price Per Unit" value={form.pricePerUnit} onChange={handleChange} className="border rounded w-full px-3 py-2" min="1" required />
       
+      {form.quantity && form.pricePerUnit && (
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <p className="text-gray-700">Total Amount: ₹{Number(form.quantity) * Number(form.pricePerUnit)}</p>
+        </div>
+      )}
+
       <div className="flex justify-end gap-3 pt-2">
         <CancelButton onClick={onClose} />
         <PrimaryButton type="submit" variant="primary">Save</PrimaryButton>

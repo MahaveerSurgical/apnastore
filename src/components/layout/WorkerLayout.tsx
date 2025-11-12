@@ -1,7 +1,7 @@
 // src/components/layout/WorkerLayout.tsx
 import React from 'react';
 import { useAuthContext } from '../../contexts/AuthContext';
-import { logout } from '../../hooks/useAuth';
+import { logout } from '../../hooks/auth/useAuth';
 import PrimaryButton from '../ui/PrimaryButton';
 
 interface WorkerLayoutProps {

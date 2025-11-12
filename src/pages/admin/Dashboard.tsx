@@ -1,4 +1,4 @@
-import { useFirestoreCollection } from '../../hooks/useFirestoreCollection';
+import { useFirestoreCollection } from '../../hooks/firestore/useFirestoreCollection';
 import { Card } from '../../components/ui/Card';
 
 export default function Dashboard() {

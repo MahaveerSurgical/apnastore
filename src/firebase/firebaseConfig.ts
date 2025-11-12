@@ -19,7 +19,6 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 
-// Firebase config (replace with your own)
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
