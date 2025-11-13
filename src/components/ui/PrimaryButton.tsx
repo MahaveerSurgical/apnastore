@@ -7,7 +7,8 @@ type Variant = "primary" | "success" | "warning" | "danger";
 // Props for the button
 interface PrimaryButtonProps {
   type?: "button" | "submit";   // Defines HTML button behavior
-  onClick?: () => void;         // Optional click handler
+  onClick?: React.MouseEventHandler<HTMLButtonElement>; // Optional click handler
+  form?: string;                // Optional form id to associate with button
   children: React.ReactNode;    // Text inside the button (e.g., "Save")
   variant?: Variant;            // For color styling
   loading?: boolean;            // To show a loading spinner
@@ -18,6 +19,7 @@ interface PrimaryButtonProps {
 const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   type = "button",
   onClick,
+  form,
   children,
   variant = "primary",
   loading = false,
@@ -39,8 +41,9 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     <button
       type={type}
       onClick={onClick}
+      form={form}
       disabled={loading || disabled}
-      className={`${baseClasses} ${variantClasses[variant]}${className}`}
+      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
     >
       {loading ? "Loading..." : children}
     </button>

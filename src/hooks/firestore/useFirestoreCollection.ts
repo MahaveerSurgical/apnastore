@@ -1,7 +1,7 @@
 // src/hooks/useFirestoreCollection.ts
 import { useEffect, useState } from 'react';
 import { collection, onSnapshot, query, orderBy, QueryConstraint } from 'firebase/firestore';
-import { db } from '../firebase/firebaseConfig';
+import { db } from '../../firebase/firebaseConfig';
 
 /**
  * Hook to fetch and listen to a Firestore collection

@@ -1,10 +1,9 @@
-import { useFirestoreCollection } from '../../hooks/useFirestoreCollection';
+import { useFirestoreCollection } from '../../hooks/firestore/useFirestoreCollection';
 import { db, runTransaction, doc } from '../../firebase/firebaseConfig';
 import { serverTimestamp } from '../../firebase/firebaseConfig';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
 import { Loading } from '../../components/ui/Loading';
-import { format } from 'date-fns';
 import PrimaryButton from '../../components/ui/PrimaryButton';
 
 export default function WorkerDashboard() {
@@ -12,14 +11,18 @@ export default function WorkerDashboard() {
   const { data: productionOrders, loading, error } = useFirestoreCollection('productionOrders');
 
   const assignedOrders = productionOrders.filter(
-    (o: any) => o.assignedWorkerId === worker?.uid && o.status === 'In Progress'
+  (o: any) => o.workerId === worker?.uid && o.status === 'In Progress'
   );
 
   const handleComplete = async (order: any) => {
     try {
       const orderRef = doc(db, 'productionOrders', order.id);
       await runTransaction(db, async (transaction) => {
-        transaction.update(orderRef, { status: 'Completed', completedAt: serverTimestamp() });
+        transaction.update(orderRef, { 
+          status: 'completed',
+          completionDate: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
       });
       alert('Order marked as Completed!');
     } catch (err) {
@@ -42,7 +45,6 @@ export default function WorkerDashboard() {
             <div>
               <p><strong>Order ID:</strong> {o.id}</p>
               <p><strong>Quantity:</strong> {o.quantity}</p>
-              <p><strong>Created At:</strong> {format(o.createdAt?.toDate(), 'dd MMM yyyy')}</p>
             </div>
             <PrimaryButton 
             variant="success"

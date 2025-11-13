@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useFirestoreCollection } from '../../hooks/useFirestoreCollection';
+import { useFirestoreCollection } from '../../hooks/firestore/useFirestoreCollection';
 import { db } from '../../firebase/firebaseConfig';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { Card } from '../../components/ui/Card';

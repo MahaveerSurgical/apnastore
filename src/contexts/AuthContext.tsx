@@ -35,21 +35,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let unsubscribeWorker: (() => void) | null = null;
 
+    console.log('[AuthContext] Setting up auth listener');
     const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
+      console.log('[AuthContext] Auth state changed:', { 
+        uid: u?.uid,
+        email: u?.email,
+        isAnonymous: u?.isAnonymous 
+      });
+      
       setUser(u);
       // Reset worker and loading when auth changes
       if (unsubscribeWorker) {
+        console.log('[AuthContext] Cleaning up previous worker listener');
         unsubscribeWorker();
         unsubscribeWorker = null;
       }
 
       if (u) {
+        console.log('[AuthContext] User authenticated, setting up worker listener');
         setLoading(true);
         setWorker(null);
         const workerDocRef = doc(db, 'workers', u.uid);
         unsubscribeWorker = onSnapshot(
           workerDocRef,
           (snap) => {
+            console.log('[AuthContext] Worker doc updated:', {
+              exists: snap.exists(),
+              data: snap.exists() ? snap.data() : null
+            });
             if (snap.exists()) {
               setWorker(snap.data() as WorkerDoc);
             } else {
@@ -58,12 +71,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setLoading(false);
           },
           (err) => {
-            console.error('Worker profile listener error', err);
+            console.error('[AuthContext] Worker profile listener error:', err);
             setWorker(null);
             setLoading(false);
           }
         );
       } else {
+        console.log('[AuthContext] No user, clearing worker state');
         setWorker(null);
         setLoading(false);
       }

@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
 import { useAuthContext } from '../../contexts/AuthContext';
-import { logout } from '../../hooks/useAuth';
+import { logout } from '../../hooks/auth/useAuth';
 import  PrimaryButton from '../ui/PrimaryButton';
 import {
   HomeIcon,

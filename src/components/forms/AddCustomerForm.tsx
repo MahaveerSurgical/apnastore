@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { useCustomers } from "../../hooks/useCustomers";
-import CancelButton from "../ui/CancelButton.tsx";
-import PrimaryButton from "../ui/PrimaryButton.tsx";
+import { useCustomers } from "../../hooks/domain/useCustomers";
+import FormLayout from "../layout/FormLayout";
+
 export default function AddCustomerForm({ onClose }: { onClose: () => void }) {
   const { addCustomer } = useCustomers();
+
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -15,9 +16,8 @@ export default function AddCustomerForm({ onClose }: { onClose: () => void }) {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name || !form.phone) return; // Basic validation
+  const handleSave = async () => {
+    if (!form.name || !form.phone) return;
 
     await addCustomer({
       ...form,
@@ -27,18 +27,82 @@ export default function AddCustomerForm({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-lg mx-auto">
-      <h2 className="text-xl font-semibold">Add Customer</h2>
-      <input name="name" placeholder="Name" value={form.name} onChange={handleChange} className="border rounded w-full px-3 py-2" required />
-      <input name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} className="border rounded w-full px-3 py-2" required />
-      <input name="address" placeholder="Address" value={form.address} onChange={handleChange} className="border rounded w-full px-3 py-2" />
-      <textarea name="notes" placeholder="Notes (e.g., special instructions, GSTIN)" value={form.notes} onChange={handleChange} className="border rounded w-full px-3 py-2" rows={3} />
-      
-      {/* 2. Add action buttons */}
-      <div className="flex justify-end gap-3 pt-2">
-        <CancelButton onClick={onClose} />
-        <PrimaryButton type="submit" variant="primary">Save</PrimaryButton>
-      </div>
-    </form>
+    <FormLayout
+      title="Add Customer"
+      onClose={onClose}
+      onSave={handleSave}
+    >
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        handleSave();
+      }} className="space-y-5">
+        {/* Section Title */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+            Customer Information
+          </h3>
+          <hr className="mt-1 border-gray-200" />
+        </div>
+
+        {/* Name */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">
+            Customer Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Enter customer name"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            required
+          />
+        </div>
+
+        {/* Phone */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">
+            Phone Number <span className="text-red-500">*</span>
+          </label>
+          <input
+            name="phone"
+            type="tel"
+            inputMode="numeric"
+            placeholder="Enter phone number"
+            value={form.phone}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            required
+          />
+        </div>
+
+        {/* Address */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">Address</label>
+          <input
+            name="address"
+            placeholder="Enter address"
+            value={form.address}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+        </div>
+
+        {/* Notes */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">
+            Notes / GSTIN
+          </label>
+          <textarea
+            name="notes"
+            placeholder="Enter notes or GSTIN"
+            value={form.notes}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+            rows={3}
+          />
+        </div>
+      </form>
+    </FormLayout>
   );
 }

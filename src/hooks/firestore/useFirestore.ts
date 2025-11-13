@@ -5,9 +5,8 @@ import {
   updateDoc, 
   deleteDoc, 
   serverTimestamp,
-//   QueryConstraint 
 } from 'firebase/firestore';
-import { db } from '../firebase/firebaseConfig';
+import { db } from '../../firebase/firebaseConfig';
 
 interface FirestoreDocument {
   id?: string;
