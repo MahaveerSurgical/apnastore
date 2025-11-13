@@ -1,13 +1,11 @@
 import React, { useState } from "react";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth, db } from "../../firebase/firebaseConfig";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
-import CancelButton from "../ui/CancelButton.tsx";
-import PrimaryButton from "../ui/PrimaryButton.tsx";
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth, db } from '../../firebase/firebaseConfig';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import FormLayout from "../layout/FormLayout.tsx";
 
 export default function AddWorkerForm({ onClose }: { onClose: () => void }) {
-
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -18,14 +16,15 @@ export default function AddWorkerForm({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async () => {
     if (!form.name || !form.email || !form.password) {
-      setError("All fields are required");
+      setError("All required fields must be filled");
       return;
     }
 
@@ -33,15 +32,16 @@ export default function AddWorkerForm({ onClose }: { onClose: () => void }) {
     setError(null);
 
     try {
-      // Create Firebase Auth account
-      const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        form.email,
+        form.password
+      );
       const user = userCredential.user;
 
-      // Update display name
       await updateProfile(user, { displayName: form.name });
 
-      // Create worker document with auth UID
-      await setDoc(doc(db, 'workers', user.uid), {
+      await setDoc(doc(db, "workers", user.uid), {
         uid: user.uid,
         name: form.name,
         email: form.email,
@@ -63,59 +63,104 @@ export default function AddWorkerForm({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-lg mx-auto">
-      <h2 className="text-xl font-semibold">Add Worker</h2>
-      {error && <div className="text-red-500">{error}</div>}
-      <input
-        name="name"
-        placeholder="Name"
-        value={form.name}
-        onChange={handleChange}
-        className="border rounded w-full px-3 py-2"
-        required
-      />
-      <input
-        name="email"
-        type="email"
-        placeholder="Email"
-        value={form.email}
-        onChange={handleChange}
-        className="border rounded w-full px-3 py-2"
-        required
-      />
-      <input
-        name="password"
-        type="password"
-        placeholder="Password"
-        value={form.password}
-        onChange={handleChange}
-        className="border rounded w-full px-3 py-2"
-        required
-      />
-      <input
-        name="phone"
-        placeholder="Phone"
-        value={form.phone}
-        onChange={handleChange}
-        className="border rounded w-full px-3 py-2"
-      />
-      <select
-        name="role"
-        value={form.role}
-        onChange={handleChange}
-        className="border rounded w-full px-3 py-2"
+    <FormLayout title="Add Worker" onClose={onClose} onSave={handleSave}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSave();
+        }}
+        className="space-y-5"
       >
-        <option value="Contract">Contract</option>
-        <option value="Admin">Admin</option>
-        <option value="Delivery">Delivery</option>
-      </select>
+        {/* Section Title */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+            Worker Information
+          </h3>
+          <hr className="mt-1 border-gray-200" />
+        </div>
 
-      <div className="flex justify-end gap-3 pt-2">
-        <CancelButton onClick={onClose} disabled={loading} />
-        <PrimaryButton type="submit" variant="primary" disabled={loading}>
-          {loading ? 'Creating Account...' : 'Save'}
-        </PrimaryButton>
-      </div>
-    </form>
+        {error && (
+          <div className="text-red-500 text-sm font-medium bg-red-50 border border-red-200 rounded p-2">
+            {error}
+          </div>
+        )}
+
+        {/* Name */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">
+            Full Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Enter full name"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            required
+          />
+        </div>
+
+        {/* Email */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">
+            Email <span className="text-red-500">*</span>
+          </label>
+          <input
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="Enter email"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            required
+          />
+        </div>
+
+        {/* Password */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">
+            Password <span className="text-red-500">*</span>
+          </label>
+          <input
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="Enter password"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            required
+          />
+        </div>
+
+        {/* Phone */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">Phone</label>
+          <input
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+            placeholder="Enter phone number"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+        </div>
+
+        {/* Role */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">
+            Role <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="role"
+            value={form.role}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          >
+            <option value="Contract">Contract</option>
+            <option value="Admin">Admin</option>
+            <option value="Delivery">Delivery</option>
+          </select>
+        </div>
+      </form>
+    </FormLayout>
   );
 }
