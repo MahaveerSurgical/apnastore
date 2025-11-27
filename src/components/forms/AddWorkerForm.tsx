@@ -13,7 +13,7 @@ export default function AddWorkerForm({ onClose }: { onClose: () => void }) {
     password: "",
     role: "Contract",
   });
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (

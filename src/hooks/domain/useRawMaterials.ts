@@ -6,7 +6,7 @@ interface RawMaterial {
   name: string;
   currentStock: number;
   unit: string;
-  reoderPoint: number;
+  reorderPoint: number;
   supplier?: string;
   price?: number;
   notes?: string;

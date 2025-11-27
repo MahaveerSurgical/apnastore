@@ -21,7 +21,7 @@ export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) 
 
   const [customerId, setCustomerId] = useState("");
   const [items, setItems] = useState<OrderItem[]>([
-    { readyBeltsId: "", type: "", size: "", quantity: 1, price: 0 },
+    { readyBeltsId: "", type: "", size: "", quantity: 0, price: 0 },
   ]);
 
   const totalAmount = useMemo(() => {
@@ -42,7 +42,7 @@ export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) 
     if (field === "quantity") {
       newItems[index] = {
         ...newItems[index],
-        quantity: value === "" ? "" : parseInt(value, 10),
+        quantity: value === "" ? "" : parseInt(value, 0),
       };
     } else if (field === "readyBeltsId") {
       const selectedBelt = readyBelts.find((b) => b.id === value);
@@ -72,7 +72,7 @@ export default function AddSalesOrderForm({ onClose }: { onClose: () => void }) 
   const addItem = () =>
     setItems([
       ...items,
-      { readyBeltsId: "", type: "", size: "", quantity: 1, price: 0 },
+      { readyBeltsId: "", type: "", size: "", quantity: 0, price: 0 },
     ]);
 
   const removeItem = (index: number) =>

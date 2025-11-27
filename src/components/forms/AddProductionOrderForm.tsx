@@ -19,7 +19,7 @@ export default function AddProductionOrderForm({ onClose }: { onClose: () => voi
   const [form, setForm] = useState<ProductionOrderForm>({
     readyBeltsId: "",
     workerId: "",
-    quantity: 1,
+    quantity: 0,
     pricePerUnit: 0,
   });
 
@@ -28,7 +28,7 @@ export default function AddProductionOrderForm({ onClose }: { onClose: () => voi
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     if (type === "number") {
-      setForm({ ...form, [name]: value === "" ? "" : parseInt(value, 10) });
+      setForm({ ...form, [name]: value === "" ? "" : parseInt(value, 0) });
     } else {
       setForm({ ...form, [name]: value });
     }

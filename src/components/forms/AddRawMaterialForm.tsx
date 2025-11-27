@@ -9,7 +9,7 @@ export default function AddRawMaterialForm({ onClose }: { onClose: () => void })
     name: "",
     unit: "kg",
     currentStock: 0 as number | "",
-    reorderPoint: 10 as number | "",
+    reorderPoint: 0 as number | "",
     supplier: "",
     pricerm: 0 as number | "",
     notes: "",
@@ -20,7 +20,7 @@ export default function AddRawMaterialForm({ onClose }: { onClose: () => void })
   ) => {
     const { name, value, type } = e.target;
     if (type === "number") {
-      setForm({ ...form, [name]: value === "" ? "" : parseInt(value, 10) });
+      setForm({ ...form, [name]: value === "" ? "" : parseFloat(value) });
     } else {
       setForm({ ...form, [name]: value });
     }
@@ -33,7 +33,7 @@ export default function AddRawMaterialForm({ onClose }: { onClose: () => void })
       await addRawMaterial({
         ...form,
         currentStock: Number(form.currentStock) || 0,
-        reoderPoint: Number(form.reorderPoint) || 0,
+        reorderPoint: Number(form.reorderPoint) || 0,
         price: Number(form.pricerm) || 0,
       });
       onClose();
@@ -137,6 +137,7 @@ export default function AddRawMaterialForm({ onClose }: { onClose: () => void })
           <input
             name="pricerm"
             type="number"
+            step="0.01"
             placeholder="Enter price per unit"
             value={form.pricerm}
             onChange={handleChange}

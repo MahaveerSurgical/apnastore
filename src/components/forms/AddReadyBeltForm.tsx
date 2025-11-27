@@ -21,7 +21,7 @@ export default function AddReadyBeltForm({ onClose }: { onClose: () => void }) {
     type: "",
     size: "",
     quantity: 0 as number | "",
-    minQuantity: 10 as number | "",
+    minQuantity: 0 as number | "",
     price: 0 as number | "",
     notes: "",
   });
@@ -33,7 +33,7 @@ export default function AddReadyBeltForm({ onClose }: { onClose: () => void }) {
   ) => {
     const { name, value, type } = e.target;
     if (type === "number") {
-      setForm({ ...form, [name]: value === "" ? "" : parseInt(value, 10) });
+      setForm({ ...form, [name]: value === "" ? "" : parseInt(value, 0) });
     } else {
       setForm({ ...form, [name]: value });
     }
@@ -46,7 +46,7 @@ export default function AddReadyBeltForm({ onClose }: { onClose: () => void }) {
     setBom((prev) => ({
       ...prev,
       [materialId]: {
-        quantity: quantity === "" ? "" : parseInt(quantity, 10),
+        quantity: quantity === "" ? "" : parseInt(quantity, 0),
         materialName: material.name,
         unit: material.unit,
       },

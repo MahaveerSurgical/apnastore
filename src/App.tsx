@@ -25,10 +25,10 @@ const Test = lazy(() => import('./pages/Test'));
 // Lazy load layouts
 const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
 const WorkerLayout = lazy(() => import('./components/layout/WorkerLayout'));
-
-export default function App() {
   // Import PendingApproval page
   const PendingApproval = lazy(() => import('./pages/auth/PendingApproval'));
+
+export default function App() {
 
   return (
     <AuthProvider>
