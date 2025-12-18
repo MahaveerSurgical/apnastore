@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useFirestoreCollection } from '../../hooks/useFirestoreCollection';
+import { useFirestoreCollection } from '../../hooks/firestore/useFirestoreCollection';
 import { db } from '../../firebase/firebaseConfig';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { Card } from '../../components/ui/Card';
+import PrimaryButton from '../../components/ui/PrimaryButton';
  
 
 export default function CustomerDetail() {
@@ -87,9 +88,11 @@ export default function CustomerDetail() {
                   onChange={(e) => setPayment(parseInt(e.target.value))}
                   className="border p-2 rounded"
                 />
-                <button onClick={handleAddPayment} className="bg-primary-500 text-grey px-4 py-2 rounded">
-                  Add
-                </button>
+        <PrimaryButton
+        onClick={handleAddPayment}variant="primary"
+        >
+        Add
+        </PrimaryButton>
               </div>
             </div>
           )}

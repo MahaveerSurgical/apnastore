@@ -1,35 +1,13 @@
 import { useState } from 'react';
-import { useFirestoreCollection } from '../../hooks/useFirestoreCollection';
+import { useCustomers } from '../../hooks/domain/useCustomers';
 import { Card } from '../../components/ui/Card';
-// import { Modal } from '../../components/ui/Modal';
-// import { db } from '../../firebase/firebaseConfig';
-// import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { Loading } from '../../components/ui/Loading';
 import { useNavigate } from 'react-router-dom';
 
 export default function Customers() {
-  const { data: customers, loading, error } = useFirestoreCollection('customers');
+  const { customers, loading, error } = useCustomers();
   const [query, setQuery] = useState('');
-  // const [isOpen, setIsOpen] = useState(false);
-  // const [name, setName] = useState('');
-  // const [phone, setPhone] = useState('');
-  // const [address, setAddress] = useState('');
   const navigate = useNavigate();
-
-  // const handleAdd = async () => {
-  //   try {
-  //     await addDoc(collection(db, 'customers'), {
-  //       name,
-  //       phone,
-  //       address,
-  //       notes: '',
-  //       pendingAmount: 0,
-  //       createdAt: serverTimestamp()
-  //     });
-  //     setIsOpen(false);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
 
   return (
     <div className="p-6">
@@ -42,7 +20,7 @@ export default function Customers() {
           className="w-full max-w-md border p-2 rounded"
         />
       </div>
-      {loading && <div className="text-gray-500">Loading...</div>}
+      {loading && <Loading />}
       {error && <div className="text-red-600">{error}</div>}
       {!loading && !error && customers.length === 0 && (
         <div className="text-gray-500">No customers yet. Use the + button to add one.</div>
@@ -63,36 +41,7 @@ export default function Customers() {
           </Card>
         ))}
       </div>
-      {/* <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-primary-500 text-grey rounded-full w-14 h-14 text-3xl"
-      >
-        +
-      </button> */}
 
-      {/* <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Add Customer">
-        <input
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full border p-2 rounded mb-2"
-        />
-        <input
-          placeholder="Phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="w-full border p-2 rounded mb-2"
-        />
-        <input
-          placeholder="Address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className="w-full border p-2 rounded mb-2"
-        />
-        <button onClick={handleAdd} className="bg-primary-500 text-blue px-4 py-2 rounded">
-          Add
-        </button>
-      </Modal> */}
     </div>
   );
 }

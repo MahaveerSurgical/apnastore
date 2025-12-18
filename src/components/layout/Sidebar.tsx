@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
 import { useAuthContext } from '../../contexts/AuthContext';
-import { logout } from '../../hooks/useAuth';
+import { logout } from '../../hooks/auth/useAuth';
+import  PrimaryButton from '../ui/PrimaryButton';
 import {
   HomeIcon,
   UsersIcon,
@@ -57,12 +58,11 @@ export const Sidebar = () => {
             </NavLink>
           ))}
         </nav>
-        <button
-          onClick={handleLogout}
-          className="mt-4 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded"
+        <PrimaryButton
+        onClick={handleLogout}variant="danger"className="mt-4 w-full"
         >
-          Logout
-        </button>
+        Logout
+        </PrimaryButton>
       </aside>
 
       {/* Mobile Bottom Nav */}

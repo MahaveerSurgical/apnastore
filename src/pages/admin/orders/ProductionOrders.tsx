@@ -1,45 +1,29 @@
-import { useFirestoreCollection } from '../../../hooks/useFirestoreCollection';
-import { db } from '../../../firebase/firebaseConfig';
-import { doc, runTransaction, serverTimestamp } from 'firebase/firestore';
+import { useProductionOrders } from '../../../hooks/domain/useProductionOrders';
 import { Card } from '../../../components/ui/Card';
+import { Loading } from '../../../components/ui/Loading';
+import { useReadyBelts } from '../../../hooks/domain/useReadyBelts';
+import { useRawMaterials } from '../../../hooks/domain/useRawMaterials';
+import { useWorkers } from '../../../hooks/domain/useWorkers';
+import PrimaryButton from '../../../components/ui/PrimaryButton';
 
 export default function ProductionOrders() {
-  const { data: productionOrders, loading: loadingOrders, error: errorOrders } = useFirestoreCollection('productionOrders');
-  const { data: finishedGoods, loading: loadingFg, error: errorFg } = useFirestoreCollection('finishedGoods');
-  const { data: rawMaterials, loading: loadingRm, error: errorRm } = useFirestoreCollection('rawMaterials');
-  const { data: workers, loading: loadingWorkers, error: errorWorkers } = useFirestoreCollection('workers');
+  const { 
+    productionOrders, 
+    loading: loadingOrders, 
+    error: errorOrders, 
+    deleteProductionOrder,
+    receiveOrder 
+  } = useProductionOrders();
+  const { readyBelts, loading: loadingRb, error: errorRb } = useReadyBelts();
+  const { rawMaterials, loading: loadingRm, error: errorRm } = useRawMaterials();
+  const { workers, loading: loadingWorkers, error: errorWorkers } = useWorkers();
 
   const handleReceive = async (order: any) => {
     try {
-      await runTransaction(db, async (transaction) => {
-        const orderRef = doc(db, 'productionOrders', order.id);
-        transaction.update(orderRef, { status: 'Received', completedAt: serverTimestamp() });
-
-        const finishedGoodRef = doc(db, 'finishedGoods', order.finishedGoodId);
-        const fgSnap = finishedGoods.find((fg: any) => fg.id === order.finishedGoodId);
-        if (!fgSnap) throw new Error('Finished good not found');
-
-        // Decrease raw materials based on BOM
-        for (const [rmId, qtyNeeded] of Object.entries(fgSnap.bom as Record<string, number>)) {
-          const rmRef = doc(db, 'rawMaterials', rmId);
-          const rmSnap = rawMaterials.find((rm: any) => rm.id === rmId);
-          if (!rmSnap) throw new Error('Raw material not found');
-          const newStock = rmSnap.currentStock - qtyNeeded * order.quantity;
-          if (newStock < 0) throw new Error('Insufficient raw material stock');
-          transaction.update(rmRef, { currentStock: newStock });
-        }
-
-        // Increase finished good stock
-        transaction.update(finishedGoodRef, { currentStock: (fgSnap.currentStock || 0) + order.quantity });
-
-        // Update worker ledger
-        const workerRef = doc(db, 'workers', order.assignedWorkerId);
-        const workerSnap = workers.find((w: any) => w.id === order.assignedWorkerId);
-        if (workerSnap) {
-          const payout = (fgSnap.pricePerUnit || 0) * order.quantity * 0.5; // example payout logic
-          transaction.update(workerRef, { pendingAmount: (workerSnap.pendingAmount || 0) + payout });
-        }
-      });
+      const readyBelt = readyBelts.find((rb: any) => rb.id === order.readyBeltsId);
+      const worker = workers.find((w: any) => w.id === order.workerId || w.uid === order.workerId);
+      
+      await receiveOrder(order, readyBelt, rawMaterials, worker);
       alert('Order received successfully!');
     } catch (err) {
       console.error(err);
@@ -47,32 +31,65 @@ export default function ProductionOrders() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this production order?')) {
+      try {
+        await deleteProductionOrder(id);
+      } catch (err) {
+        console.error('Error deleting production order:', err);
+        alert('Failed to delete production order');
+      }
+    }
+  };
+
   return (
     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-      {(loadingOrders || loadingFg || loadingRm || loadingWorkers) && <div className="text-gray-500">Loading...</div>}
-      {(errorOrders || errorFg || errorRm || errorWorkers) && (
-        <div className="text-red-600">{errorOrders || errorFg || errorRm || errorWorkers}</div>
+      {(loadingOrders || loadingRb || loadingRm || loadingWorkers) && (<Loading 
+      message={
+      loadingOrders ? "Loading orders..." : 
+      loadingRb ? "Loading finished goods..." :
+      loadingRm ? "Loading raw materials..." :
+      loadingWorkers ? "Loading workers..." :
+      "Loading customers..."
+      } 
+    />
+  )}
+      {(errorOrders || errorRb || errorRm || errorWorkers) && (
+        <div className="text-red-600">{errorOrders || errorRb || errorRm || errorWorkers}</div>
       )}
       {!loadingOrders && !errorOrders && productionOrders.length === 0 && (
         <div className="text-gray-500">No production orders yet.</div>
       )}
       {productionOrders.map((order: any) => {
-        const worker = workers.find((w: any) => w.id === order.assignedWorkerId);
-        const fg = finishedGoods.find((f: any) => f.id === order.finishedGoodId);
+        const worker = workers.find((w: any) => w.id === order.workerId || w.uid === order.workerId);
+        const rb = readyBelts.find((f: any) =>
+          f.id === order.readyBeltsId ||
+          f.type === order.beltType ||
+          f.name === order.beltType
+        );
+
         return (
           <Card key={order.id} title={`Order #${order.id}`}>
-            <p>Finished Good: {fg?.name}</p>
+            <p>Finished Good: {rb?.type || 'N/A'}</p>
             <p>Quantity: {order.quantity}</p>
-            <p>Assigned Worker: {worker?.name}</p>
+            <p>Assigned Worker: {worker?.name || order.workerName || 'Unknown'}</p>
             <p>Status: {order.status}</p>
-            {order.status === 'Completed' && (
-              <button
-                className="mt-2 px-4 py-1 bg-green-500 text-white rounded"
-                onClick={() => handleReceive(order)}
+            <div className="flex gap-2 mt-4">
+              {order.status === 'completed' && (
+                <PrimaryButton
+                  onClick={() => handleReceive(order)}
+                  variant="success"
+                >
+                  Receive
+                </PrimaryButton>
+              )}
+              <PrimaryButton
+                onClick={() => handleDelete(order.id)}
+                variant="danger"
               >
-                Receive
-              </button>
-            )}
+                Delete
+              </PrimaryButton>
+            </div>
           </Card>
         );
       })}

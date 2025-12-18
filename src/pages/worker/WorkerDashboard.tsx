@@ -1,22 +1,28 @@
-import { useFirestoreCollection } from '../../hooks/useFirestoreCollection';
+import { useFirestoreCollection } from '../../hooks/firestore/useFirestoreCollection';
 import { db, runTransaction, doc } from '../../firebase/firebaseConfig';
+import { serverTimestamp } from '../../firebase/firebaseConfig';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
-import { format } from 'date-fns';
+import { Loading } from '../../components/ui/Loading';
+import PrimaryButton from '../../components/ui/PrimaryButton';
 
 export default function WorkerDashboard() {
   const { worker } = useAuthContext();
   const { data: productionOrders, loading, error } = useFirestoreCollection('productionOrders');
 
   const assignedOrders = productionOrders.filter(
-    (o: any) => o.assignedWorkerId === worker?.uid && o.status === 'In Progress'
+  (o: any) => o.workerId === worker?.uid && o.status === 'In Progress'
   );
 
   const handleComplete = async (order: any) => {
     try {
       const orderRef = doc(db, 'productionOrders', order.id);
       await runTransaction(db, async (transaction) => {
-        transaction.update(orderRef, { status: 'Completed', completedAt: new Date() });
+        transaction.update(orderRef, { 
+          status: 'completed',
+          completionDate: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
       });
       alert('Order marked as Completed!');
     } catch (err) {
@@ -28,7 +34,7 @@ export default function WorkerDashboard() {
   return (
     <div className="p-6 space-y-4">
       <h2 className="text-2xl font-semibold">Assigned Work</h2>
-      {loading && <div className="text-gray-500">Loading...</div>}
+      {loading && <Loading />}
       {error && <div className="text-red-600">{error}</div>}
       {!loading && !error && assignedOrders.length === 0 && (
         <div className="text-gray-500">No assigned orders yet.</div>
@@ -39,14 +45,13 @@ export default function WorkerDashboard() {
             <div>
               <p><strong>Order ID:</strong> {o.id}</p>
               <p><strong>Quantity:</strong> {o.quantity}</p>
-              <p><strong>Created At:</strong> {format(o.createdAt?.toDate(), 'dd MMM yyyy')}</p>
             </div>
-            <button
-              className="bg-primary-600 text-white px-3 py-1 rounded"
+            <PrimaryButton 
+            variant="success"
               onClick={() => handleComplete(o)}
             >
               Mark Completed
-            </button>
+            </PrimaryButton>
           </div>
         </Card>
       ))}
