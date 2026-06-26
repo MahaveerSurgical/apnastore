@@ -1,21 +1,46 @@
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useReadyBelts } from '../../../hooks/domain/useReadyBelts';
 import { Card } from '../../../components/ui/Card';
 import { Loading } from '../../../components/ui/Loading';
-import PrimaryButton from '../../../components/ui/PrimaryButton';
+
+type ReadyBelt = {
+  id: string;
+  type: string;
+  size: string;
+  currentStock?: number;
+  price?: number;
+  notes?: string;
+};
+
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 
 export default function ReadyBelts() {
-  const { readyBelts: belts, loading: loadingBelts, error: errorBelts, deleteReadyBelt } = useReadyBelts();
+  const navigate = useNavigate();
+  const { readyBelts: belts, loading: loadingBelts, error: errorBelts } = useReadyBelts();
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this ready belt?')) {
-      try {
-        await deleteReadyBelt(id);
-      } catch (err) {
-        console.error('Error deleting ready belt:', err);
-        alert('Failed to delete ready belt');
-      }
-    }
-  };
+  const groupedBelts = useMemo(() => {
+    const groups = new Map<string, ReadyBelt[]>();
+
+    belts.forEach((belt: ReadyBelt) => {
+      const key = belt.type || 'Untitled';
+      const currentGroup = groups.get(key) || [];
+      currentGroup.push(belt);
+      groups.set(key, currentGroup);
+    });
+
+    return Array.from(groups.entries()).map(([type, items]) => ({
+      type,
+      slug: slugify(type),
+      items,
+      totalStock: items.reduce((sum, item) => sum + (item.currentStock || 0), 0),
+    })).sort((left, right) => left.type.localeCompare(right.type, undefined, { numeric: true, sensitivity: 'base' }));
+  }, [belts]);
 
 
   return (
@@ -28,27 +53,20 @@ export default function ReadyBelts() {
       {!loadingBelts && !errorBelts && belts.length === 0 && (
         <div className="text-gray-500">No finished goods yet. Use the + button to add one.</div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {belts.map((b: any) => (
-          <Card key={b.id} title={b.name}>
-            <p>Name:{b.type}</p>
-            <p>Stock: {b.quantity}</p>
-            <p>Price: ₹{b.price}</p>
-            <p>BOM:</p>
-            <ul className="list-disc list-inside mb-4">
-             {Object.entries(b.billOfMaterials || {}).map(([rmId, item]: [string, any]) => (
-                <li key={rmId}>
-                  {item.materialName} ({item.unit}) — {item.quantity}
-                </li>
-            ))}
-            </ul>
-            <div className="mt-4">
-              <PrimaryButton
-                variant="danger"
-                onClick={() => handleDelete(b.id)}
-              >
-                Delete
-              </PrimaryButton>
+      <div className="space-y-3">
+        {groupedBelts.map((group) => (
+          <Card
+            key={group.slug}
+            onClick={() => navigate(`/inventory/ready-belts/${encodeURIComponent(group.slug)}`)}
+            className="cursor-pointer transition-shadow hover:shadow-md"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-lg font-semibold text-primary-800 break-words">
+                {group.type}
+              </span>
+              <span className="shrink-0 text-sm font-medium text-gray-700">
+                {group.totalStock}
+              </span>
             </div>
           </Card>
         ))}

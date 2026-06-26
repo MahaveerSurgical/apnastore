@@ -13,6 +13,7 @@ export default function WorkerLayout({ children }: WorkerLayoutProps) {
 
   const handleLogout = async () => {
     try {
+      if (!window.confirm('Are you sure you want to log out?')) return;
       await logout();
     } catch (err) {
       console.error(err);

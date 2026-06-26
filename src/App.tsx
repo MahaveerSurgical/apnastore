@@ -15,6 +15,7 @@ const CustomerDetail = lazy(() => import('./pages/admin/CustomerDetail'));
 const Workers = lazy(() => import('./pages/admin/Workers'));
 const RawMaterials = lazy(() => import('./pages/admin/inventory/RawMaterials'));
 const ReadyBelts = lazy(() => import('./pages/admin/inventory/ReadyBelts'));
+const ReadyBeltDetail = lazy(() => import('./pages/admin/inventory/ReadyBeltDetail'));
 const ProductionOrders = lazy(() => import('./pages/admin/orders/ProductionOrders'));
 const SalesOrders = lazy(() => import('./pages/admin/orders/SalesOrders'));
 const WorkerDashboard = lazy(() => import('./pages/worker/WorkerDashboard'));
@@ -97,6 +98,14 @@ export default function App() {
               element={
                 <Suspense fallback={<Loading message="Loading ready belts..." />}>
                   <ReadyBelts />
+                </Suspense>
+              }
+            />
+            <Route
+              path="inventory/ready-belts/:type"
+              element={
+                <Suspense fallback={<Loading message="Loading ready belt details..." />}>
+                  <ReadyBeltDetail />
                 </Suspense>
               }
             />

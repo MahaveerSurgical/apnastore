@@ -11,7 +11,7 @@ export default function WorkerDashboard() {
   const { data: productionOrders, loading, error } = useFirestoreCollection('productionOrders');
 
   const assignedOrders = productionOrders.filter(
-  (o: any) => o.workerId === worker?.uid && o.status === 'In Progress'
+  (o: any) => o.workerId === worker?.uid && o.status === 'in-progress'
   );
 
   const handleComplete = async (order: any) => {

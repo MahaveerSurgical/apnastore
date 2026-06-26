@@ -44,14 +44,14 @@ export function useProductionOrders() {
         if (!readyBelt) throw new Error('Finished good not found');
 
         // Decrease raw materials based on BOM
-        for (const [rmId, qtyNeeded] of Object.entries(readyBelt.bom as Record<string, number>)) {
-          const rmRef = doc(db, 'rawMaterials', rmId);
-          const rmSnap = rawMaterials.find((rm: any) => rm.id === rmId);
-          if (!rmSnap) throw new Error('Raw material not found');
-          const newStock = rmSnap.currentStock - qtyNeeded * order.quantity;
-          if (newStock < 0) throw new Error('Insufficient raw material stock');
-          transaction.update(rmRef, { currentStock: newStock });
-        }
+        // for (const [rmId, qtyNeeded] of Object.entries(readyBelt.bom as Record<string, number>)) {
+        //   const rmRef = doc(db, 'rawMaterials', rmId);
+        //   const rmSnap = rawMaterials.find((rm: any) => rm.id === rmId);
+        //   if (!rmSnap) throw new Error('Raw material not found');
+        //   const newStock = rmSnap.currentStock - qtyNeeded * order.quantity;
+        //   if (newStock < 0) throw new Error('Insufficient raw material stock');
+        //   transaction.update(rmRef, { currentStock: newStock });
+        // }
 
         // Increase finished good stock
         transaction.update(readyBeltsRef, { 
