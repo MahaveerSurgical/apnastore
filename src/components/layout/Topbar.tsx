@@ -6,6 +6,7 @@ export const Topbar = () => {
   const { worker } = useAuthContext();
 
   const handleLogout = async () => {
+    if (!window.confirm('Are you sure you want to log out?')) return;
     await logout();
   };
 

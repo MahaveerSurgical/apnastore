@@ -20,7 +20,7 @@ export default function AddReadyBeltForm({ onClose }: { onClose: () => void }) {
   const [form, setForm] = useState({
     type: "",
     size: "",
-    quantity: 0 as number | "",
+    currentStock: 0 as number | "",
     minQuantity: 0 as number | "",
     price: 0 as number | "",
     notes: "",
@@ -79,7 +79,7 @@ export default function AddReadyBeltForm({ onClose }: { onClose: () => void }) {
 
     await addReadyBelt({
       ...form,
-      currentStock: Number(form.quantity) || 0,
+      currentStock: Number(form.currentStock) || 0,
       minQuantity: Number(form.minQuantity) || 0,
       price: Number(form.price) || 0,
       billOfMaterials,
@@ -146,9 +146,9 @@ export default function AddReadyBeltForm({ onClose }: { onClose: () => void }) {
               Initial Quantity
             </label>
             <input
-              name="quantity"
+              name="currentStock"
               type="number"
-              value={form.quantity}
+              value={form.currentStock}
               onChange={handleChange}
               placeholder="e.g. 20"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"

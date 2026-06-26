@@ -65,7 +65,7 @@ export default function AddProductionOrderForm({ onClose }: { onClose: () => voi
         beltType: selectedBelt.type,
         readyBeltsId: selectedBelt.id,
         quantity,
-        status: "pending",
+        status: "in-progress",
         startDate: new Date(),
         notes: "",
         pricePerUnit,
